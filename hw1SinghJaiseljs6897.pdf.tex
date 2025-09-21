@@ -2,7 +2,6 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{geometry}
-\usepackage{tikz}
 \geometry{margin=1in}
 
 \title{COMS W4733: Computational Aspects of Robotics\\Homework 1}
@@ -15,253 +14,215 @@
 \section*{Problem 1: Homogeneous Transformations}
 
 \subsection*{1. Convert to homogeneous coordinates (1 point)}
-Converting $p_A^{\text{cart}} = \begin{bmatrix} 2 \\ 1 \\ 1 \end{bmatrix}$ to homogeneous coordinates:
-$$p_A = \begin{bmatrix} p_A^{\text{cart}} \\ 1 \end{bmatrix} = \begin{bmatrix} 2 \\ 1 \\ 1 \\ 1 \end{bmatrix}$$
+Convert $p_A^{\text{cart}} = \begin{bmatrix} 2 \\ 1 \\ 1 \end{bmatrix}$ to homogeneous:
+\[
+p_A = \begin{bmatrix} p_A^{\text{cart}} \\ 1 \end{bmatrix}
+= \begin{bmatrix} 2 \\ 1 \\ 1 \\ 1 \end{bmatrix}.
+\]
 
-\subsection*{2. Construct $^A T_B$ (4 points)}
-Frame $\{B\}$ is rotated 90° about the $z$-axis (counter-clockwise) relative to $\{A\}$:
-$$R = R_z(90°) = \begin{bmatrix} 
-\cos(90°) & -\sin(90°) & 0 \\
-\sin(90°) & \cos(90°) & 0 \\
-0 & 0 & 1
-\end{bmatrix} = \begin{bmatrix}
-0 & -1 & 0 \\
-1 & 0 & 0 \\
-0 & 0 & 1
-\end{bmatrix}$$
-
-With translation $t = \begin{bmatrix} 1 \\ -2 \\ 0 \end{bmatrix}$:
-$$^A T_B = \begin{bmatrix}
-R & t \\
-0 & 0 & 0 & 1
-\end{bmatrix} = \begin{bmatrix}
-0 & -1 & 0 & 1 \\
-1 & 0 & 0 & -2 \\
-0 & 0 & 1 & 0 \\
-0 & 0 & 0 & 1
-\end{bmatrix}$$
+\subsection*{2. Construct $^{A}\!T_{B}$ (4 points)}
+Rotation $90^\circ$ about $+z$:
+\[
+R = R_z(90^\circ) =
+\begin{bmatrix}
+0 & -1 & 0\\
+1 & \phantom{-}0 & 0\\
+0 & \phantom{-}0 & 1
+\end{bmatrix},
+\qquad
+t = \begin{bmatrix} 1 \\ -2 \\ 0 \end{bmatrix}.
+\]
+Therefore
+\[
+^{A}\!T_{B}=\begin{bmatrix}R&t\\0~0~0&1\end{bmatrix}
+=
+\begin{bmatrix}
+0 & -1 & 0 & 1\\
+1 & \phantom{-}0 & 0 & -2\\
+0 & \phantom{-}0 & 1 & 0\\
+0 & \phantom{-}0 & 0 & 1
+\end{bmatrix}.
+\]
 
 \subsection*{3. Transform the point (3 points)}
-To find the coordinates of $p$ in frame $\{B\}$:
-$$^B T_A = (^A T_B)^{-1}$$
-
-For a homogeneous transformation matrix:
-$$^B T_A = \begin{bmatrix}
-R^T & -R^T t \\
+Use $(^{A}\!T_{B})^{-1}=\begin{bmatrix}R^\top&-R^\top t\\ 0&1\end{bmatrix}$:
+\[
+^{B}\!T_{A}=
+\begin{bmatrix}
+0 & 1 & 0 & 2\\
+-1 & 0 & 0 & 1\\
+0 & 0 & 1 & 0\\
 0 & 0 & 0 & 1
-\end{bmatrix}$$
-
-Computing:
-$^B R_A = R^T = \begin{bmatrix}
-0 & 1 & 0 \\
--1 & 0 & 0 \\
-0 & 0 & 1
-\end{bmatrix}$
-
-$-R^T t = -\begin{bmatrix}
-0 & 1 & 0 \\
--1 & 0 & 0 \\
-0 & 0 & 1
-\end{bmatrix} \begin{bmatrix} 1 \\ -2 \\ 0 \end{bmatrix} = -\begin{bmatrix} -2 \\ -1 \\ 0 \end{bmatrix} = \begin{bmatrix} 2 \\ 1 \\ 0 \end{bmatrix}$
-
-Therefore:
-$^B T_A = \begin{bmatrix}
-0 & 1 & 0 & 2 \\
--1 & 0 & 0 & 1 \\
-0 & 0 & 1 & 0 \\
-0 & 0 & 0 & 1
-\end{bmatrix}$
-
-Computing $p_B = ^B T_A \cdot p_A$:
-$p_B = \begin{bmatrix}
-0 & 1 & 0 & 2 \\
--1 & 0 & 0 & 1 \\
-0 & 0 & 1 & 0 \\
-0 & 0 & 0 & 1
-\end{bmatrix} \begin{bmatrix} 2 \\ 1 \\ 1 \\ 1 \end{bmatrix} = \begin{bmatrix} 0\cdot2 + 1\cdot1 + 0\cdot1 + 2\cdot1 \\ -1\cdot2 + 0\cdot1 + 0\cdot1 + 1\cdot1 \\ 0\cdot2 + 0\cdot1 + 1\cdot1 + 0\cdot1 \\ 1 \end{bmatrix} = \begin{bmatrix} 3 \\ -1 \\ 1 \\ 1 \end{bmatrix}$
-
-Thus: $p_B^{\text{cart}} = \begin{bmatrix} 3 \\ -1 \\ 1 \end{bmatrix}$
+\end{bmatrix},\qquad
+p_B = {}^{B}\!T_{A}\,p_A =
+\begin{bmatrix} 3\\ -1\\ 1\\ 1\end{bmatrix}.
+\]
+So $p_B^{\text{cart}}=(3,-1,1)^\top$.
 
 \subsection*{4. Interpret the result (2 points)}
-The 90° rotation about the $z$-axis swapped and negated the $x$ and $y$ components. The translation then shifted the point in the expected direction. The result is reasonable as the point moved from $(2,1,1)$ in frame $\{A\}$ to $(3,-3,1)$ in frame $\{B\}$.
+The $90^\circ$ rotation swaps $(x,y)\mapsto(-y,x)$; the translation adds $(+1,-2,0)$, yielding $(3,-1,1)$ as expected.
 
 \section*{Problem 2: Configuration Space and Workspace (Mobile Robot)}
 
 \subsection*{1. C-space and DOF (2 points)}
-\subsubsection*{(a) Configuration space}
-$q = (x, y, \theta) \in \mathbb{R}^2 \times S^1$
-$\mathcal{Q} = [0, 5] \times [0, 4] \times (-\pi, \pi] \subset \mathbb{R}^2 \times S^1$
-$\mathcal{Q} = \{q = (x, y, \theta) : x \in [0, 5], y \in [0, 4], \theta \in (-\pi, \pi]\}$
-
-\subsubsection*{(b) Degrees of freedom}
-There are 3 DOFs in this robot: 2 translational ($x, y$) and 1 rotational ($\theta$).
+\noindent
+(a) $q=(x,y,\theta)\in\mathbb{R}^2\times S^1$ with
+\[
+\mathcal{Q}=[0,5]\times[0,4]\times(-\pi,\pi].
+\]
+(b) $\mathrm{DOF}=3$ (two translational, one rotational).
 
 \subsection*{2. Position workspace of $P$ (5 points)}
-\subsubsection*{(a) Ignoring the footprint (2 pts)}
-$\mathcal{W} = [0, 5] \times [0, 4]$
-$\mathcal{W} = \{(x, y) : x \in [0, 5], y \in [0, 4]\} \subset \mathbb{R}^2$
+(a) Ignoring footprint:
+\[
+\mathcal{W}=[0,5]\times[0,4].
+\]
+(b) With disc footprint $r_R=0.35$:
+\[
+\mathcal{W}_{\text{clear}}=\{(x,y): 0.35\le x\le 4.65,\ 0.35\le y\le 3.65\}.
+\]
+(c) $(0.30,0.30)\notin\mathcal{W}_{\text{clear}}$ (collision).
 
-\subsubsection*{(b) With the footprint (2 pts)}
-Footprint → Disk $r_R = 0.35$ m
-
-To include footprint, we perform a "Minkowski Sum":
-$A \oplus B = \{a + b \mid a \in A, b \in B\}$
-
-Hence:
-$\mathcal{W}_{\text{clear}} = \mathcal{W} \oplus (-\text{Footprint})$
-
-The robot center must stay strictly more than $r_R$ from each wall:
-$\mathcal{W}_{\text{clear}} = \{(x, y) : x \in [0.35, 4.65], y \in [0.35, 3.65]\} \subset \mathbb{R}^2$
-
-\subsubsection*{(c) Quick check (1 pt)}
-The point $(x, y) = (0.30, 0.30)$ is \textbf{not} reachable without collision as $(0.30, 0.30) \notin \mathcal{W}_{\text{clear}}$ as defined in part (b).
-
-\subsection*{3. Workspace → C-space obstacles (2 points)}
-\subsubsection*{(a) C-space obstacle}
-Given: $\mathcal{O} = \{(x, y) : \|(x, y) - (0.9, 0.3)\| \leq 0.10\}$
-
-Obstacle is a circular object with center at $(x, y) = (0.9, 0.3)$ and radius of 0.10 m.
-
-But we must also consider the robot footprint, hence:
-$\sqrt{(x - 0.9)^2 + (y - 0.3)^2} \leq r_{\text{footprint}} + r_{\text{obstacle}} = 0.10 + 0.35 = 0.45$
-
-Therefore:
-$(x - 0.9)^2 + (y - 0.3)^2 \leq 0.2025$
-$\mathcal{Q}_{\text{obstacle}} = \{(x, y, \theta) : \|(x, y) - (0.9, 0.3)\| \leq 0.2025\}$
-
-The obstacle does not depend on $\theta$ under this approximation.
-
-\subsubsection*{(b) Configuration check}
-For $q^* = (1.20, 0.40, \theta = 0.524)$:
-
-Check if $q^* \in \mathcal{Q}_{\text{obs}}$:
-$(x - 0.9)^2 + (y - 0.3)^2 \leq 0.2025$
-
-With $(x, y) = (1.20, 0.40)$:
-$(1.20 - 0.9)^2 + (0.40 - 0.3)^2 = (0.30)^2 + (0.10)^2 = 0.09 + 0.01 = 0.10 < 0.2025$
-
-Hence $q^* \in \mathcal{Q}_{\text{obs}}$ since the point $(1.20, 0.40)$ is inside the C-space obstacle.
+\subsection*{3. Workspace $\to$ C-space obstacles (2 points)}
+Obstacle
+\(
+\mathcal{O}=\{(x,y):\|(x,y)-(0.9,0.3)\|\le 0.10\}.
+\)
+Grow by $r_R$:
+\[
+\|(x,y)-(0.9,0.3)\| \le 0.10+0.35=0.45
+\iff
+(x-0.9)^2+(y-0.3)^2 \le 0.45^2=0.2025.
+\]
+Thus
+\(
+\mathcal{Q}_{\text{obs}}=\{(x,y,\theta): (x-0.9)^2+(y-0.3)^2\le 0.2025\}.
+\)
+For $q^\star=(1.20,0.40,0.524)$:
+$(1.20-0.9)^2+(0.40-0.3)^2=0.10<0.2025\Rightarrow q^\star\in\mathcal{Q}_{\text{obs}}$.
 
 \subsection*{4. Connectivity (1 point)}
-$\mathcal{Q}_{\text{free}}$ is path-connected if there exists a continuous path in configuration space between any two points in $\mathcal{Q}_{\text{free}}$. This is essential for motion planning as it ensures a robot can move between any two valid configurations.
+$\mathcal{Q}_{\text{free}}$ is \emph{path-connected} if any two configurations in it are connected by a continuous collision-free path.
 
 \section*{Problem 3: Forward Kinematics (2R Planar Arm)}
 
 \subsection*{1. Geometric FK for position \& orientation (4 points)}
-\subsubsection*{(a) Vector expression for end-effector position}
-The end-effector position can be expressed as:
-$p_E = R(\theta_1) \begin{bmatrix} L_1 \\ 0 \end{bmatrix} + R(\theta_1 + \theta_2) \begin{bmatrix} L_2 \\ 0 \end{bmatrix}$
+(a) Vector form:
+\[
+p_E =
+\underbrace{R(\theta_1)\!\begin{bmatrix}L_1\\0\end{bmatrix}}_{\text{Link 1}}
++
+\underbrace{R(\theta_1+\theta_2)\!\begin{bmatrix}L_2\\0\end{bmatrix}}_{\text{Link 2}},
+\quad
+R(\alpha)=\begin{bmatrix}\cos\alpha&-\sin\alpha\\ \sin\alpha&\cos\alpha\end{bmatrix}.
+\]
+(b) Scalars:
+\[
+x=L_1\cos\theta_1+L_2\cos(\theta_1+\theta_2),\quad
+y=L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2).
+\]
+(c) Orientation: $\phi=\theta_1+\theta_2$ (since $\theta_2$ is relative).
 
-where $R(\theta)$ represents rotation by angle $\theta$.
-
-Expanding the rotation matrices:
-$p_E = \begin{bmatrix} \cos\theta_1 & -\sin\theta_1 \\ \sin\theta_1 & \cos\theta_1 \end{bmatrix} \begin{bmatrix} L_1 \\ 0 \end{bmatrix} + \begin{bmatrix} \cos(\theta_1 + \theta_2) & -\sin(\theta_1 + \theta_2) \\ \sin(\theta_1 + \theta_2) & \cos(\theta_1 + \theta_2) \end{bmatrix} \begin{bmatrix} L_2 \\ 0 \end{bmatrix}$
-
-$p_E = \begin{bmatrix} L_1\cos\theta_1 \\ L_1\sin\theta_1 \end{bmatrix} + \begin{bmatrix} L_2\cos(\theta_1 + \theta_2) \\ L_2\sin(\theta_1 + \theta_2) \end{bmatrix}$
-
-$p_E = p_1 + p_2 = \begin{bmatrix} L_1\cos\theta_1 + L_2\cos(\theta_1 + \theta_2) \\ L_1\sin\theta_1 + L_2\sin(\theta_1 + \theta_2) \end{bmatrix}$
-
-Think of vector expression as: Rotate by $\theta_1$ and translate along local $x$-axis, then rotate by $\theta_2$ and translate along local $x$-axis.
-
-\subsubsection*{(b) Scalar formulas}
-From the vector expression:
-$x(\theta_1, \theta_2) = L_1\cos\theta_1 + L_2\cos(\theta_1 + \theta_2)$
-$y(\theta_1, \theta_2) = L_1\sin\theta_1 + L_2\sin(\theta_1 + \theta_2)$
-
-This is based on $R(\theta)\begin{bmatrix} L \\ 0 \end{bmatrix} = \begin{bmatrix} L\cos\theta \\ L\sin\theta \end{bmatrix}$
-
-\subsubsection*{(c) End-effector orientation}
-$\phi(\theta_1, \theta_2) = \theta_1 + \theta_2$
-
-The end-effector orientation is the sum of both joint angles as each joint angle contributes additively to the total rotation. This makes sense since both rotations are CCW relative to the same axis, resulting in a total orientation of $\theta_1 + \theta_2$ relative to the base frame.
-
-\subsection*{2. Pose in SE(2) (3 points)}
-\subsubsection*{(a) Homogeneous transform matrix}
-Assembling the homogeneous transform with rotation by $\phi = \theta_1 + \theta_2$ and translation $(x, y)$:
-
-$^0 T_E = \begin{bmatrix}
-\cos(\theta_1 + \theta_2) & -\sin(\theta_1 + \theta_2) & L_1\cos\theta_1 + L_2\cos(\theta_1 + \theta_2) \\
-\sin(\theta_1 + \theta_2) & \cos(\theta_1 + \theta_2) & L_1\sin\theta_1 + L_2\sin(\theta_1 + \theta_2) \\
-0 & 0 & 1
-\end{bmatrix}$
-
-\subsubsection*{(b) Product of elementary transforms}
-Express as product: $^0 T_E = ^0 T_1 \cdot ^1 T_E$
-
-Base to Link 1:
-$^0 T_1 = \begin{bmatrix}
-\cos\theta_1 & -\sin\theta_1 & L_1\cos\theta_1 \\
-\sin\theta_1 & \cos\theta_1 & L_1\sin\theta_1 \\
-0 & 0 & 1
-\end{bmatrix}$
-
-Link 1 to End-effector:
-$^1 T_E = \begin{bmatrix}
-\cos\theta_2 & -\sin\theta_2 & L_2\cos\theta_2 \\
-\sin\theta_2 & \cos\theta_2 & L_2\sin\theta_2 \\
-0 & 0 & 1
-\end{bmatrix}$
-
-The multiplication $^0 T_E = ^0 T_1 \cdot ^1 T_E$ yields the result in part (a).
+\subsection*{2. Pose in $\text{SE}(2)$ (3 points)}
+\[
+{}^{0}\!T_{E}=
+\begin{bmatrix}
+\cos\phi&-\sin\phi&x\\
+\sin\phi& \cos\phi&y\\
+0&0&1
+\end{bmatrix}
+=
+\underbrace{R_z(\theta_1)T_x(L_1)}_{^{0}\!T_1}\,
+\underbrace{R_z(\theta_2)T_x(L_2)}_{^{1}\!T_E}.
+\]
 
 \subsection*{3. Numeric evaluation (2 points)}
-For $\theta_1 = 30° = \pi/6$ rad and $\theta_2 = 60° = \pi/3$ rad:
-\begin{align}
-\phi &= \theta_1 + \theta_2 = \pi/6 + \pi/3 = \pi/2 = 1.571 \text{ rad} \\
-x &= 1.0\cos(\pi/6) + 0.8\cos(\pi/2) = 0.866 + 0 = 0.866 \text{ m} \\
-y &= 1.0\sin(\pi/6) + 0.8\sin(\pi/2) = 0.5 + 0.8 = 1.300 \text{ m}
-\end{align}
-
-$$^0 T_E = \begin{bmatrix}
-0 & -1 & 0.866 \\
-1 & 0 & 1.300 \\
-0 & 0 & 1
-\end{bmatrix}$$
+For $\theta_1=30^\circ=\pi/6$ and $\theta_2=60^\circ=\pi/3$ with $L_1=1.0$, $L_2=0.8$:
+\[
+\phi=1.571,\quad x=0.866,\quad y=1.300,\qquad
+{}^{0}\!T_E=\begin{bmatrix}0&-1&0.866\\ 1&0&1.300\\ 0&0&1\end{bmatrix}.
+\]
 
 \subsection*{4. Tool offset (gripper) (1 point)}
-Gripper transform:
-$$^E T_G = \begin{bmatrix}
-1 & 0 & 0.1 \\
-0 & 1 & 0 \\
-0 & 0 & 1
-\end{bmatrix}$$
-
-For the gripper position:
-\begin{align}
-x_G &= x_E + d_g\cos\phi = 0.866 + 0.1\cos(\pi/2) = 0.866 \text{ m} \\
-y_G &= y_E + d_g\sin\phi = 1.300 + 0.1\sin(\pi/2) = 1.400 \text{ m}
-\end{align}
+With $d_g=0.10$ along $x_E$:
+\[
+{}^{E}\!T_G=T_x(d_g),\quad
+{}^{0}\!T_G={}^{0}\!T_E{}^{E}\!T_G=
+\begin{bmatrix}
+\cos\phi&-\sin\phi&x+d_g\cos\phi\\
+\sin\phi& \cos\phi&y+d_g\sin\phi\\
+0&0&1
+\end{bmatrix}.
+\]
+Numerically $(x_G,y_G)=(0.866,1.400)$.
 
 \section*{Problem 4: Inverse Kinematics (2R Planar Arm)}
 
 \subsection*{1. Reachability condition (2 points)}
-For a point $(x, y)$ to be reachable:
-$$|L_1 - L_2| \leq r \leq L_1 + L_2$$
-
-where $r = \sqrt{x^2 + y^2}$. This represents the annulus between the inner circle (arm folded) and outer circle (arm extended).
+Let $r=\sqrt{x^2+y^2}$. The point $(x,y)$ is reachable iff
+\[
+\boxed{|L_1-L_2|\le r\le L_1+L_2},
+\]
+i.e., the target lies in the annulus between the inner (arm folded) and outer (arm stretched) circles.
 
 \subsection*{2. Elbow angle $\theta_2$ (3 points)}
-Using the law of cosines:
-$$\cos\theta_2 = \frac{x^2 + y^2 - L_1^2 - L_2^2}{2L_1L_2}$$
-
-Therefore:
-$$\theta_2 = \pm \arccos\left(\frac{x^2 + y^2 - L_1^2 - L_2^2}{2L_1L_2}\right)$$
-
-Two branches:
-- Elbow-up: $\theta_2 > 0$ (positive branch)
-- Elbow-down: $\theta_2 < 0$ (negative branch)
+Law of cosines on triangle $(L_1,L_2,r)$ with elbow interior angle $\pi-\theta_2$:
+\[
+\cos\theta_2=\frac{r^2-L_1^2-L_2^2}{2L_1L_2}=:c_2,\qquad
+s_2=\pm\sqrt{1-c_2^2},\qquad
+\boxed{\ \theta_2=\mathrm{atan2}(s_2,c_2)\ }.
+\]
+Two branches: \emph{elbow-up} ($s_2>0$) and \emph{elbow-down} ($s_2<0$).
 
 \subsection*{3. Shoulder angle $\theta_1$ (3 points)}
-$$\theta_1 = \text{atan2}(y, x) - \text{atan2}(L_2\sin\theta_2, L_1 + L_2\cos\theta_2)$$
+Let $\alpha=\mathrm{atan2}(y,x)$ and $\beta=\mathrm{atan2}\!\big(L_2 s_2,\ L_1+L_2 c_2\big)$. Then
+\[
+\boxed{\ \theta_1=\alpha-\beta
+= \mathrm{atan2}(y,x)-\mathrm{atan2}\!\big(L_2 s_2,\ L_1+L_2 c_2\big)\ }.
+\]
+This yields one $\theta_1$ for each choice of $\mathrm{sign}(s_2)$.
 
-This gives two $\theta_1$ values corresponding to the two $\theta_2$ branches.
+\subsection*{4. Numeric test \& joint limits (2 points)}
+Target $x^\star=1.20$, $y^\star=0.40$; link lengths $L_1=1.0$, $L_2=0.8$; limits
+\[
+\theta_1\in[-\pi,\pi),\qquad \theta_2\in\Big[-\frac{3\pi}{4},\,\frac{3\pi}{4}\Big]=[-2.356,\,2.356].
+\]
 
-\pi/4, 3\pi/4]$:
-- Elbow-up: $\theta_1 = -0.414$ ✓, $\theta_2 = 0.927$ ✗ (exceeds $3\pi/4 \approx 2.356$)
-- Elbow-down: $\theta_1 = 1.058$ ✓, $\theta_2 = -0.927$ ✓
+\paragraph{Compute $r$, $c_2$, $s_2$.}
+\[
+r=\sqrt{1.20^2+0.40^2}=1.265,\quad
+c_2=\frac{r^2-L_1^2-L_2^2}{2L_1L_2}=\frac{1.265^2-1.0^2-0.8^2}{2(1)(0.8)}=-0.025.
+\]
+\[
+s_2=\pm\sqrt{1-c_2^2}=\pm 0.999687.
+\]
 
-Only the elbow-down configuration satisfies the joint limits.
+\paragraph{Angles for the two branches.}
+\[
+\alpha=\mathrm{atan2}(0.40,1.20)=0.322,\qquad
+\beta=\mathrm{atan2}(L_2 s_2,\ L_1+L_2 c_2)=\mathrm{atan2}(0.8\,s_2,\ 0.980).
+\]
+\[
+\begin{array}{lcl}
+\text{Elbow-up }(s_2>0): & \theta_2=+1.596, & \theta_1=\alpha-\beta=-0.363,\\[2pt]
+\text{Elbow-down }(s_2<0): & \theta_2=-1.596, & \theta_1=\alpha-\beta=+1.006.
+\end{array}
+\]
+(Values rounded to 3 decimals.)
 
-Forward check verification confirms the solution is correct.
+\paragraph{Joint-limit check.}
+Both sets lie within $\theta_1\in[-\pi,\pi)$ and $\theta_2\in[-2.356,2.356]$:
+\[
+\boxed{(-0.363,\ +1.596)}\ \text{(elbow-up)}\quad\text{and}\quad
+\boxed{(+1.006,\ -1.596)}\ \text{(elbow-down)}\ \ \text{are valid.}
+\]
+
+\paragraph{Forward check (tolerance $10^{-3}$).}
+Using the FK from Problem~3,
+\[
+\hat x=L_1\cos\theta_1+L_2\cos(\theta_1+\theta_2),\qquad
+\hat y=L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2),
+\]
+both branches return $(\hat x,\hat y)=(1.200,\,0.400)$ (error $<10^{-12}$), hence the target is met.
 
 \end{document}
