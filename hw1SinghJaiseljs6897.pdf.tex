@@ -89,38 +89,58 @@ The 90° rotation about the $z$-axis swapped and negated the $x$ and $y$ compone
 
 \subsection*{1. C-space and DOF (2 points)}
 \subsubsection*{(a) Configuration space}
-$$\mathcal{Q} = \{(x, y, \theta) : x \in [0, 5], y \in [0, 4], \theta \in (-\pi, \pi]\} \subset \mathbb{R}^2 \times S^1$$
+$q = (x, y, \theta) \in \mathbb{R}^2 \times S^1$
+$\mathcal{Q} = [0, 5] \times [0, 4] \times (-\pi, \pi] \subset \mathbb{R}^2 \times S^1$
+$\mathcal{Q} = \{q = (x, y, \theta) : x \in [0, 5], y \in [0, 4], \theta \in (-\pi, \pi]\}$
 
 \subsubsection*{(b) Degrees of freedom}
-The robot has 3 DOFs: 2 translational ($x, y$) and 1 rotational ($\theta$).
+There are 3 DOFs in this robot: 2 translational ($x, y$) and 1 rotational ($\theta$).
 
 \subsection*{2. Position workspace of $P$ (5 points)}
-\subsubsection*{(a) Ignoring the footprint}
-$$\mathcal{W} = \{(x, y) : x \in [0, 5], y \in [0, 4]\} \subset \mathbb{R}^2$$
+\subsubsection*{(a) Ignoring the footprint (2 pts)}
+$\mathcal{W} = [0, 5] \times [0, 4]$
+$\mathcal{W} = \{(x, y) : x \in [0, 5], y \in [0, 4]\} \subset \mathbb{R}^2$
 
-\subsubsection*{(b) With the footprint}
-To avoid collision, point $P$ must stay at least $r_R = 0.35$ m away from walls:
-$$\mathcal{W}_{\text{clear}} = \{(x, y) : x \in [0.35, 4.65], y \in [0.35, 3.65]\} \subset \mathbb{R}^2$$
+\subsubsection*{(b) With the footprint (2 pts)}
+Footprint → Disk $r_R = 0.35$ m
 
-\subsubsection*{(c) Quick check}
-The point $(x, y) = (0.30, 0.30)$ is \textbf{not} reachable without collision since $(0.30, 0.30) \notin \mathcal{W}_{\text{clear}}$.
+To include footprint, we perform a "Minkowski Sum":
+$A \oplus B = \{a + b \mid a \in A, b \in B\}$
+
+Hence:
+$\mathcal{W}_{\text{clear}} = \mathcal{W} \oplus (-\text{Footprint})$
+
+The robot center must stay strictly more than $r_R$ from each wall:
+$\mathcal{W}_{\text{clear}} = \{(x, y) : x \in [0.35, 4.65], y \in [0.35, 3.65]\} \subset \mathbb{R}^2$
+
+\subsubsection*{(c) Quick check (1 pt)}
+The point $(x, y) = (0.30, 0.30)$ is \textbf{not} reachable without collision as $(0.30, 0.30) \notin \mathcal{W}_{\text{clear}}$ as defined in part (b).
 
 \subsection*{3. Workspace → C-space obstacles (2 points)}
 \subsubsection*{(a) C-space obstacle}
-Given obstacle $\mathcal{O} = \{(x, y) : \|(x, y) - (0.9, 0.3)\| \leq 0.10\}$
+Given: $\mathcal{O} = \{(x, y) : \|(x, y) - (0.9, 0.3)\| \leq 0.10\}$
 
-Using Minkowski sum with robot footprint:
-$$\mathcal{Q}_{\text{obs}} = \{(x, y, \theta) : \|(x, y) - (0.9, 0.3)\| \leq 0.45\}$$
+Obstacle is a circular object with center at $(x, y) = (0.9, 0.3)$ and radius of 0.10 m.
 
-The obstacle does not depend on $\theta$ under the disc approximation.
+But we must also consider the robot footprint, hence:
+$\sqrt{(x - 0.9)^2 + (y - 0.3)^2} \leq r_{\text{footprint}} + r_{\text{obstacle}} = 0.10 + 0.35 = 0.45$
+
+Therefore:
+$(x - 0.9)^2 + (y - 0.3)^2 \leq 0.2025$
+$\mathcal{Q}_{\text{obstacle}} = \{(x, y, \theta) : \|(x, y) - (0.9, 0.3)\| \leq 0.2025\}$
+
+The obstacle does not depend on $\theta$ under this approximation.
 
 \subsubsection*{(b) Configuration check}
 For $q^* = (1.20, 0.40, \theta = 0.524)$:
 
-Distance check:
-$$d = \|(1.20, 0.40) - (0.9, 0.3)\| = \sqrt{(0.30)^2 + (0.10)^2} = \sqrt{0.10} \approx 0.316$$
+Check if $q^* \in \mathcal{Q}_{\text{obs}}$:
+$(x - 0.9)^2 + (y - 0.3)^2 \leq 0.2025$
 
-Since $d = 0.316 < 0.45$, we have $q^* \in \mathcal{Q}_{\text{obs}}$.
+With $(x, y) = (1.20, 0.40)$:
+$(1.20 - 0.9)^2 + (0.40 - 0.3)^2 = (0.30)^2 + (0.10)^2 = 0.09 + 0.01 = 0.10 < 0.2025$
+
+Hence $q^* \in \mathcal{Q}_{\text{obs}}$ since the point $(1.20, 0.40)$ is inside the C-space obstacle.
 
 \subsection*{4. Connectivity (1 point)}
 $\mathcal{Q}_{\text{free}}$ is path-connected if there exists a continuous path in configuration space between any two points in $\mathcal{Q}_{\text{free}}$. This is essential for motion planning as it ensures a robot can move between any two valid configurations.
@@ -128,44 +148,61 @@ $\mathcal{Q}_{\text{free}}$ is path-connected if there exists a continuous path 
 \section*{Problem 3: Forward Kinematics (2R Planar Arm)}
 
 \subsection*{1. Geometric FK for position \& orientation (4 points)}
-\subsubsection*{(a) Vector expression}
-$$p_E = R(\theta_1) \begin{bmatrix} L_1 \\ 0 \end{bmatrix} + R(\theta_1 + \theta_2) \begin{bmatrix} L_2 \\ 0 \end{bmatrix}$$
+\subsubsection*{(a) Vector expression for end-effector position}
+The end-effector position can be expressed as:
+$p_E = R(\theta_1) \begin{bmatrix} L_1 \\ 0 \end{bmatrix} + R(\theta_1 + \theta_2) \begin{bmatrix} L_2 \\ 0 \end{bmatrix}$
 
-Expanding:
-$$p_E = \begin{bmatrix} L_1 \cos\theta_1 \\ L_1 \sin\theta_1 \end{bmatrix} + \begin{bmatrix} L_2 \cos(\theta_1 + \theta_2) \\ L_2 \sin(\theta_1 + \theta_2) \end{bmatrix}$$
+where $R(\theta)$ represents rotation by angle $\theta$.
+
+Expanding the rotation matrices:
+$p_E = \begin{bmatrix} \cos\theta_1 & -\sin\theta_1 \\ \sin\theta_1 & \cos\theta_1 \end{bmatrix} \begin{bmatrix} L_1 \\ 0 \end{bmatrix} + \begin{bmatrix} \cos(\theta_1 + \theta_2) & -\sin(\theta_1 + \theta_2) \\ \sin(\theta_1 + \theta_2) & \cos(\theta_1 + \theta_2) \end{bmatrix} \begin{bmatrix} L_2 \\ 0 \end{bmatrix}$
+
+$p_E = \begin{bmatrix} L_1\cos\theta_1 \\ L_1\sin\theta_1 \end{bmatrix} + \begin{bmatrix} L_2\cos(\theta_1 + \theta_2) \\ L_2\sin(\theta_1 + \theta_2) \end{bmatrix}$
+
+$p_E = p_1 + p_2 = \begin{bmatrix} L_1\cos\theta_1 + L_2\cos(\theta_1 + \theta_2) \\ L_1\sin\theta_1 + L_2\sin(\theta_1 + \theta_2) \end{bmatrix}$
+
+Think of vector expression as: Rotate by $\theta_1$ and translate along local $x$-axis, then rotate by $\theta_2$ and translate along local $x$-axis.
 
 \subsubsection*{(b) Scalar formulas}
-$$x(\theta_1, \theta_2) = L_1 \cos\theta_1 + L_2 \cos(\theta_1 + \theta_2)$$
-$$y(\theta_1, \theta_2) = L_1 \sin\theta_1 + L_2 \sin(\theta_1 + \theta_2)$$
+From the vector expression:
+$x(\theta_1, \theta_2) = L_1\cos\theta_1 + L_2\cos(\theta_1 + \theta_2)$
+$y(\theta_1, \theta_2) = L_1\sin\theta_1 + L_2\sin(\theta_1 + \theta_2)$
+
+This is based on $R(\theta)\begin{bmatrix} L \\ 0 \end{bmatrix} = \begin{bmatrix} L\cos\theta \\ L\sin\theta \end{bmatrix}$
 
 \subsubsection*{(c) End-effector orientation}
-$$\phi(\theta_1, \theta_2) = \theta_1 + \theta_2$$
+$\phi(\theta_1, \theta_2) = \theta_1 + \theta_2$
 
-The end-effector orientation is the sum of both joint angles as each contributes additively to the total rotation.
+The end-effector orientation is the sum of both joint angles as each joint angle contributes additively to the total rotation. This makes sense since both rotations are CCW relative to the same axis, resulting in a total orientation of $\theta_1 + \theta_2$ relative to the base frame.
 
 \subsection*{2. Pose in SE(2) (3 points)}
-\subsubsection*{(a) Homogeneous transform}
-$$^0 T_E = \begin{bmatrix}
+\subsubsection*{(a) Homogeneous transform matrix}
+Assembling the homogeneous transform with rotation by $\phi = \theta_1 + \theta_2$ and translation $(x, y)$:
+
+$^0 T_E = \begin{bmatrix}
 \cos(\theta_1 + \theta_2) & -\sin(\theta_1 + \theta_2) & L_1\cos\theta_1 + L_2\cos(\theta_1 + \theta_2) \\
 \sin(\theta_1 + \theta_2) & \cos(\theta_1 + \theta_2) & L_1\sin\theta_1 + L_2\sin(\theta_1 + \theta_2) \\
 0 & 0 & 1
-\end{bmatrix}$$
+\end{bmatrix}$
 
 \subsubsection*{(b) Product of elementary transforms}
-$$^0 T_E = ^0 T_1 \cdot ^1 T_E$$
+Express as product: $^0 T_E = ^0 T_1 \cdot ^1 T_E$
 
-where:
-$$^0 T_1 = \begin{bmatrix}
+Base to Link 1:
+$^0 T_1 = \begin{bmatrix}
 \cos\theta_1 & -\sin\theta_1 & L_1\cos\theta_1 \\
 \sin\theta_1 & \cos\theta_1 & L_1\sin\theta_1 \\
 0 & 0 & 1
-\end{bmatrix}$$
+\end{bmatrix}$
 
-$$^1 T_E = \begin{bmatrix}
+Link 1 to End-effector:
+$^1 T_E = \begin{bmatrix}
 \cos\theta_2 & -\sin\theta_2 & L_2\cos\theta_2 \\
 \sin\theta_2 & \cos\theta_2 & L_2\sin\theta_2 \\
 0 & 0 & 1
-\end{bmatrix}$$
+\end{bmatrix}$
+
+The multiplication $^0 T_E = ^0 T_1 \cdot ^1 T_E$ yields the result in part (a).
 
 \subsection*{3. Numeric evaluation (2 points)}
 For $\theta_1 = 30° = \pi/6$ rad and $\theta_2 = 60° = \pi/3$ rad:
