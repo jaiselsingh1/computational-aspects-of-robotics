@@ -4,8 +4,10 @@
 \usepackage{geometry}
 \geometry{margin=1in}
 
+\DeclareMathOperator{\atan}{atan}
+
 \title{COMS W4733: Computational Aspects of Robotics\\Homework 1}
-\author{Your Name \\ Your UNI}
+\author{Jaisel Singh \\ js6897}
 \date{September 26, 2025}
 
 \begin{document}
@@ -45,7 +47,7 @@ Therefore
 \]
 
 \subsection*{3. Transform the point (3 points)}
-Use $(^{A}\!T_{B})^{-1}=\begin{bmatrix}R^\top&-R^\top t\\ 0&1\end{bmatrix}$:
+Use ${(^{A}\!T_{B})}^{-1}=\begin{bmatrix}R^\top&-R^\top t\\ 0&1\end{bmatrix}$:
 \[
 ^{B}\!T_{A}=
 \begin{bmatrix}
@@ -183,46 +185,83 @@ Let $\alpha=\mathrm{atan2}(y,x)$ and $\beta=\mathrm{atan2}\!\big(L_2 s_2,\ L_1+L
 This yields one $\theta_1$ for each choice of $\mathrm{sign}(s_2)$.
 
 \subsection*{4. Numeric test \& joint limits (2 points)}
-Target $x^\star=1.20$, $y^\star=0.40$; link lengths $L_1=1.0$, $L_2=0.8$; limits
+Target $(x^\star,y^\star)=(1.200,0.400)$, $L_1=1.0$, $L_2=0.8$.
+Limits: $\theta_1\in[-\pi,\pi)$, $\theta_2\in[-3\pi/4,3\pi/4]=[-2.356,2.356]$.
+
+\paragraph{Step 1: $r$, $c_2$, $s_2$ (3 d.p.).}
 \[
-\theta_1\in[-\pi,\pi),\qquad \theta_2\in\Big[-\frac{3\pi}{4},\,\frac{3\pi}{4}\Big]=[-2.356,\,2.356].
+r^2 = 1.200^2+0.400^2 = 1.600,\qquad r=\sqrt{1.600}= \boxed{1.265}.
+\]
+\[
+c_2=\frac{r^2-L_1^2-L_2^2}{2L_1L_2}
+=\frac{1.600-1.000-0.640}{2(1.0)(0.8)}
+=\frac{-0.040}{1.600}= \boxed{-0.025},
+\]
+\[
+s_2=\pm\sqrt{1-c_2^2}= \pm\sqrt{1-0.025^2}= \boxed{\pm 0.999}.
 \]
 
-\paragraph{Compute $r$, $c_2$, $s_2$.}
+\paragraph{Step 2: $\alpha$ and $\beta$ (3 d.p.).}
 \[
-r=\sqrt{1.20^2+0.40^2}=1.265,\quad
-c_2=\frac{r^2-L_1^2-L_2^2}{2L_1L_2}=\frac{1.265^2-1.0^2-0.8^2}{2(1)(0.8)}=-0.025.
+\alpha=\atan2(0.400,1.200)=\atan(1/3)= \boxed{0.322}\ \text{rad},
 \]
 \[
-s_2=\pm\sqrt{1-c_2^2}=\pm 0.999687.
-\]
-
-\paragraph{Angles for the two branches.}
-\[
-\alpha=\mathrm{atan2}(0.40,1.20)=0.322,\qquad
-\beta=\mathrm{atan2}(L_2 s_2,\ L_1+L_2 c_2)=\mathrm{atan2}(0.8\,s_2,\ 0.980).
+L_1+L_2c_2=1.0+0.8(-0.025)=0.980,\quad L_2s_2=0.8\times 0.999=0.800.
 \]
 \[
-\begin{array}{lcl}
-\text{Elbow-up }(s_2>0): & \theta_2=+1.596, & \theta_1=\alpha-\beta=-0.363,\\[2pt]
-\text{Elbow-down }(s_2<0): & \theta_2=-1.596, & \theta_1=\alpha-\beta=+1.006.
-\end{array}
-\]
-(Values rounded to 3 decimals.)
-
-\paragraph{Joint-limit check.}
-Both sets lie within $\theta_1\in[-\pi,\pi)$ and $\theta_2\in[-2.356,2.356]$:
-\[
-\boxed{(-0.363,\ +1.596)}\ \text{(elbow-up)}\quad\text{and}\quad
-\boxed{(+1.006,\ -1.596)}\ \text{(elbow-down)}\ \ \text{are valid.}
+\beta_{\pm}=\atan2(\pm 0.800,\,0.980)= \boxed{\pm 0.684}\ \text{rad}.
 \]
 
-\paragraph{Forward check (tolerance $10^{-3}$).}
-Using the FK from Problem~3,
+\paragraph{Step 3: Joint angles (3 d.p.).}
 \[
-\hat x=L_1\cos\theta_1+L_2\cos(\theta_1+\theta_2),\qquad
-\hat y=L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2),
+\theta_2=\atan2(s_2,c_2)=
+\begin{cases}
+\boxed{+1.596} & (s_2>0,\ \text{elbow-up}),\\
+\boxed{-1.596} & (s_2<0,\ \text{elbow-down}),
+\end{cases}
+\qquad
+\theta_1=\alpha-\beta_{\pm}=
+\begin{cases}
+\boxed{-0.363} & (\text{elbow-up}),\\
+\boxed{+1.006} & (\text{elbow-down}).
+\end{cases}
 \]
-both branches return $(\hat x,\hat y)=(1.200,\,0.400)$ (error $<10^{-12}$), hence the target is met.
+
+\paragraph{Step 4: Joint-limit check.}
+\[
+-2.356\le \pm 1.596 \le 2.356,\qquad -\pi< -0.363,\ 1.006 < \pi.
+\]
+\[
+\boxed{(-0.363,\ +1.596)}\ \text{and}\ \boxed{(1.006,\ -1.596)}\ \text{both satisfy the limits.}
+\]
+
+\paragraph{Step 5: Forward check (using the rounded angles).}
+\[
+\hat x=L_1\cos\theta_1+L_2\cos(\theta_1+\theta_2),\quad
+\hat y=L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2).
+\]
+
+\emph{Elbow-up} $(\theta_1,\theta_2)=(-0.363,\,1.596)$:
+\[
+\cos\theta_1\approx 0.935,\ \sin\theta_1\approx -0.355,\ 
+\cos(\theta_1+\theta_2)=\cos(1.233)\approx 0.332,\ 
+\sin(1.233)\approx 0.944.
+\]
+\[
+\hat x=1(0.935)+0.8(0.332)=\underline{1.201}\approx 1.200,\quad
+\hat y=1(-0.355)+0.8(0.944)=\underline{0.400}\ (\le 10^{-3}\ \text{from }y^\star).
+\]
+
+\emph{Elbow-down} $(\theta_1,\theta_2)=(1.006,\,-1.596)$:
+\[
+\cos\theta_1\approx 0.535,\ \sin\theta_1\approx 0.845,\ 
+\cos(\theta_1+\theta_2)=\cos(-0.590)\approx 0.831,\ 
+\sin(-0.590)\approx -0.556.
+\]
+\[
+\hat x=1(0.535)+0.8(0.831)=\underline{1.200},\quad
+\hat y=1(0.845)+0.8(-0.556)=\underline{0.400}.
+\]
+In both branches, $\|(\hat x,\hat y)-(x^\star,y^\star)\|\le 10^{-3}$.
 
 \end{document}
