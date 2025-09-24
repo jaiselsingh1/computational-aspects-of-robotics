@@ -1,8 +1,32 @@
 \documentclass[11pt]{article}
+\usepackage{geometry}
 \usepackage{amsmath}
 \usepackage{amssymb}
-\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{listings}
+\usepackage{xcolor}
+
 \geometry{margin=1in}
+
+% Configure Python syntax highlighting
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=2,
+    inputencoding=utf8,
+    extendedchars=true,
+    literate={θ}{{$\theta$}}1
+}
 
 \DeclareMathOperator{\atan}{atan}
 
@@ -62,7 +86,8 @@ p_B = {}^{B}\!T_{A}\,p_A =
 So $p_B^{\text{cart}}=(3,-1,1)^\top$.
 
 \subsection*{4. Interpret the result (2 points)}
-The $90^\circ$ rotation swaps $(x,y)\mapsto(-y,x)$; the translation adds $(+1,-2,0)$, yielding $(3,-1,1)$ as expected.
+The $90^\circ$ rotation swaps $(x,y)\mapsto(-y,x)$; the translation adds $(+1,-2,0)$, yielding $(3,-1,1)$ as expected. $^{B}\!T_{A}$ is the inverse transformation, it first translates the point by $-t$ and then performs a $90^\circ$ \emph{clockwise} rotation about the z-axis. This explicitly works out to be:
+$p_B = R^\top (p_A - t)$.
 
 \section*{Problem 2: Configuration Space and Workspace (Mobile Robot)}
 
@@ -81,35 +106,42 @@ The $90^\circ$ rotation swaps $(x,y)\mapsto(-y,x)$; the translation adds $(+1,-2
 \]
 (b) With disc footprint $r_R=0.35$:
 \[
-\mathcal{W}_{\text{clear}}=\{(x,y): 0.35\le x\le 4.65,\ 0.35\le y\le 3.65\}.
+\mathcal{W}_{\text{clear}}=\{(x,y): 0.35 < x < 4.65,\ 0.35 < y < 3.65\}.
 \]
-(c) $(0.30,0.30)\notin\mathcal{W}_{\text{clear}}$ (collision).
+(c) The point $(0.30,0.30)\notin\mathcal{W}_{\text{clear}}$ (collision).
 
-\subsection*{3. Workspace $\to$ C-space obstacles (2 points)}
-Obstacle
-\(
-\mathcal{O}=\{(x,y):\|(x,y)-(0.9,0.3)\|\le 0.10\}.
-\)
-Grow by $r_R$:
-\[
-\|(x,y)-(0.9,0.3)\| \le 0.10+0.35=0.45
-\iff
-(x-0.9)^2+(y-0.3)^2 \le 0.45^2=0.2025.
-\]
-Thus
-\(
-\mathcal{Q}_{\text{obs}}=\{(x,y,\theta): (x-0.9)^2+(y-0.3)^2\le 0.2025\}.
-\)
-For $q^\star=(1.20,0.40,0.524)$:
-$(1.20-0.9)^2+(0.40-0.3)^2=0.10<0.2025\Rightarrow q^\star\in\mathcal{Q}_{\text{obs}}$.
+\subsection*{3. Workspace $\to$ C-space Obstacles (2 points)}
+
+\begin{enumerate}[label=(\alph*)]
+    \item The C-space obstacle set is obtained by growing the obstacle radius by $r_R$:
+    \[
+    Q_{\text{obs}} = \{(x,y) \mid \|(x,y) - (0.9,0.3)\| \leq 0.10 + r_R\}
+    = \{(x,y) \mid \|(x,y) - (0.9,0.3)\| \leq 0.45\}.
+    \]
+
+    This set does not depend on $\theta$ because the robot is a disc (isotropic).
+
+    \item For $q^\star = (1.20,\,0.40,\,\theta=0.524)$, compute the distance:
+    \[
+    d = \|(1.20,\,0.40) - (0.9,\,0.3)\|
+      = \sqrt{0.3^2 + 0.1^2}
+      = 0.316 < 0.45.
+    \]
+
+    Hence, $q^\star \in Q_{\text{obs}}$ (the configuration is in collision).
+\end{enumerate}
+
+
 
 \subsection*{4. Connectivity (1 point)}
-$\mathcal{Q}_{\text{free}}$ is \emph{path-connected} if any two configurations in it are connected by a continuous collision-free path.
+$\mathcal{Q}_{\text{free}}$ is \emph{path-connected} if any two configurations in it are connected by a continuous collision-free path. This means that every pair of collision-free configurations can be connected by a continuous collision free path. This property is essential for motion planning because it gurantees that a planner can find a path between any two configurations in $\mathcal{Q}_{\text{free}}$ if one exists.
 
 \section*{Problem 3: Forward Kinematics (2R Planar Arm)}
 
 \subsection*{1. Geometric FK for position \& orientation (4 points)}
-(a) Vector form:
+
+\begin{enumerate}[label=(\alph*)]
+\item Vector form:
 \[
 p_E =
 \underbrace{R(\theta_1)\!\begin{bmatrix}L_1\\0\end{bmatrix}}_{\text{Link 1}}
@@ -118,50 +150,123 @@ p_E =
 \quad
 R(\alpha)=\begin{bmatrix}\cos\alpha&-\sin\alpha\\ \sin\alpha&\cos\alpha\end{bmatrix}.
 \]
-(b) Scalars:
+
+\item Scalars:
 \[
 x=L_1\cos\theta_1+L_2\cos(\theta_1+\theta_2),\quad
 y=L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2).
 \]
-(c) Orientation: $\phi=\theta_1+\theta_2$ (since $\theta_2$ is relative).
 
-\subsection*{2. Pose in $\text{SE}(2)$ (3 points)}
+\item Orientation:
+\[
+\phi=\theta_1+\theta_2
+\]
+(since $\theta_2$ is relative to link 1).
+\end{enumerate}
+
+\subsection*{2. Pose in $\mathrm{SE}(2)$ (3 points)}
+
+\begin{enumerate}[label=(\alph*)]
+\item General pose of $E$ in frame $0$:
 \[
 {}^{0}\!T_{E}=
 \begin{bmatrix}
-\cos\phi&-\sin\phi&x\\
-\sin\phi& \cos\phi&y\\
+\cos\phi & -\sin\phi & x\\[2pt]
+\sin\phi & \ \cos\phi & y\\[2pt]
 0&0&1
-\end{bmatrix}
-=
-\underbrace{R_z(\theta_1)T_x(L_1)}_{^{0}\!T_1}\,
-\underbrace{R_z(\theta_2)T_x(L_2)}_{^{1}\!T_E}.
+\end{bmatrix},\qquad \phi=\theta_1+\theta_2 .
 \]
 
-\subsection*{3. Numeric evaluation (2 points)}
-For $\theta_1=30^\circ=\pi/6$ and $\theta_2=60^\circ=\pi/3$ with $L_1=1.0$, $L_2=0.8$:
+\item Compose link transforms explicitly:
 \[
-\phi=1.571,\quad x=0.866,\quad y=1.300,\qquad
-{}^{0}\!T_E=\begin{bmatrix}0&-1&0.866\\ 1&0&1.300\\ 0&0&1\end{bmatrix}.
+{}^{0}\!T_{E} = {}^{0}\!T_{1}\,{}^{1}\!T_{E},
 \]
-
-\subsection*{4. Tool offset (gripper) (1 point)}
-With $d_g=0.10$ along $x_E$:
+with
 \[
-{}^{E}\!T_G=T_x(d_g),\quad
-{}^{0}\!T_G={}^{0}\!T_E{}^{E}\!T_G=
+{}^{0}\!T_{1}=
 \begin{bmatrix}
-\cos\phi&-\sin\phi&x+d_g\cos\phi\\
-\sin\phi& \cos\phi&y+d_g\sin\phi\\
+\cos\theta_1 & -\sin\theta_1 & L_1\cos\theta_1\\
+\sin\theta_1 & \ \cos\theta_1 & L_1\sin\theta_1\\
+0&0&1
+\end{bmatrix},\quad
+{}^{1}\!T_{E}=
+\begin{bmatrix}
+\cos\theta_2 & -\sin\theta_2 & L_2\cos\theta_2\\
+\sin\theta_2 & \ \cos\theta_2 & L_2\sin\theta_2\\
 0&0&1
 \end{bmatrix}.
 \]
-Numerically $(x_G,y_G)=(0.866,1.400)$.
+
+Multiplying,
+\[
+{}^{0}\!T_{E}=
+\begin{bmatrix}
+\cos(\theta_1+\theta_2) & -\sin(\theta_1+\theta_2) & L_2\cos(\theta_1+\theta_2)+L_1\cos\theta_1\\[2pt]
+\sin(\theta_1+\theta_2) & \ \cos(\theta_1+\theta_2) & L_2\sin(\theta_1+\theta_2)+L_1\sin\theta_1\\[2pt]
+0&0&1
+\end{bmatrix}.
+\]
+
+\item Extract the end-effector point explicitly:
+\[
+p_E^{\,0} = {}^{0}\!T_{E}\,p_E^{\,E},
+\qquad
+p_E^{\,E}=\begin{bmatrix}0\\0\\1\end{bmatrix}
+\;\Rightarrow\;
+p_E^{\,0}=\begin{bmatrix}x\\y\\1\end{bmatrix}.
+\]
+\end{enumerate}
+
+\subsection*{3. Numeric evaluation (2 points)}
+
+For $\theta_1=30^\circ=\pi/6$, $\theta_2=60^\circ=\pi/3$, $L_1=1.0$, $L_2=0.8$:
+
+\[
+\phi=\theta_1+\theta_2=\tfrac{\pi}{2},\qquad
+x=0.8\cos\tfrac{\pi}{2}+1\cos\tfrac{\pi}{6}=0.866,\qquad
+y=0.8\sin\tfrac{\pi}{2}+1\sin\tfrac{\pi}{6}=1.300.
+\]
+
+\[
+{}^{0}\!T_{E}=
+\begin{bmatrix}
+0 & -1 & 0.866\\
+1 & 0 & 1.300\\
+0 & 0 & 1
+\end{bmatrix}.
+\]
+
+\subsection*{4. Tool offset (gripper) (1 point)}
+
+Offset $d_g=0.10$ along $x_E$:
+
+\[
+{}^{E}\!T_{G}=
+\begin{bmatrix}
+1&0&d_g\\
+0&1&0\\
+0&0&1
+\end{bmatrix},
+\qquad
+{}^{0}\!T_{G} = {}^{0}\!T_{E}\,{}^{E}\!T_{G}
+=
+\begin{bmatrix}
+\cos\phi & -\sin\phi & x+d_g\cos\phi\\
+\sin\phi & \ \cos\phi & y+d_g\sin\phi\\
+0&0&1
+\end{bmatrix}.
+\]
+
+Numerically,
+\[
+(x_G,y_G)=(0.866,1.400).
+\]
+
 
 \section*{Problem 4: Inverse Kinematics (2R Planar Arm)}
 
 \subsection*{1. Reachability condition (2 points)}
-Let $r=\sqrt{x^2+y^2}$. The point $(x,y)$ is reachable iff
+Let $r=\sqrt{x^2+y^2}$. The point $(x,y)$ is reachable if:
 \[
 \boxed{|L_1-L_2|\le r\le L_1+L_2},
 \]
@@ -263,5 +368,52 @@ L_1+L_2c_2=1.0+0.8(-0.025)=0.980,\quad L_2s_2=0.8\times 0.999=0.800.
 \hat y=1(0.845)+0.8(-0.556)=\underline{0.400}.
 \]
 In both branches, $\|(\hat x,\hat y)-(x^\star,y^\star)\|\le 10^{-3}$.
+
+\subsection*{4.4 Numerical IK Computation}
+
+The following Python script implements the inverse kinematics computation for Problem 4:
+
+\begin{lstlisting}[caption={Python Implementation of 2R Planar Arm Inverse Kinematics}]
+import math
+
+L1, L2 = 1.0, 0.8
+x, y = 1.20, 0.40
+
+r = math.hypot(x, y)
+c = (r*r - L1*L1 - L2*L2) / (2*L1*L2)
+s = math.sqrt(1 - c*c)
+
+theta2_down = math.atan2(+s, c)
+theta2_up   = math.atan2(-s, c)
+
+a_down = L1 + L2*math.cos(theta2_down)
+b_down = L2*math.sin(theta2_down)
+theta1_down = math.atan2(y, x) - math.atan2(b_down, a_down)
+
+a_up = L1 + L2*math.cos(theta2_up)
+b_up = L2*math.sin(theta2_up)
+theta1_up = math.atan2(y, x) - math.atan2(b_up, a_up)
+
+print(f"Elbow-down: theta1={theta1_down:.3f}, theta2={theta2_down:.3f}")
+print(f"Elbow-up:   theta1={theta1_up:.3f}, theta2={theta2_up:.3f}")
+
+xd = L1*math.cos(theta1_down) + L2*math.cos(theta1_down + 
+     theta2_down)
+yd = L1*math.sin(theta1_down) + L2*math.sin(theta1_down + 
+     theta2_down)
+xu = L1*math.cos(theta1_up)   + L2*math.cos(theta1_up   + theta2_up)
+yu = L1*math.sin(theta1_up)   + L2*math.sin(theta1_up   + theta2_up)
+
+print(f"Forward check: down = ({xd:.3f}, {yd:.3f})")
+print(f"Forward check: up   = ({xu:.3f}, {yu:.3f})")
+\end{lstlisting}
+
+\textbf{Output:}
+\begin{verbatim}
+Elbow-down: theta1=-0.363, theta2=1.596
+Elbow-up:   theta1=1.006, theta2=-1.596
+Forward check: down = (1.200, 0.400)
+Forward check: up   = (1.200, 0.400)
+\end{verbatim}
 
 \end{document}
