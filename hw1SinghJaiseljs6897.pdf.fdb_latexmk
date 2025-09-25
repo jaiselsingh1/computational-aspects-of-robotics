@@ -1,6 +1,6 @@
 # Fdb version 4
-["pdflatex"] 1758748762.58085 "/Users/jaiselsingh/Desktop/coursework/computational_aspects_of_robotics/hw1SinghJaiseljs6897.pdf.tex" "hw1SinghJaiseljs6897.pdf.pdf" "hw1SinghJaiseljs6897.pdf" 1758748763.03094 0
-  "/Users/jaiselsingh/Desktop/coursework/computational_aspects_of_robotics/hw1SinghJaiseljs6897.pdf.tex" 1758748762.37747 11427 6afe46ca2070a23defd96848f451c053 ""
+["pdflatex"] 1758830149.88461 "/Users/jaiselsingh/Desktop/coursework/computational_aspects_of_robotics/hw1SinghJaiseljs6897.pdf.tex" "hw1SinghJaiseljs6897.pdf.pdf" "hw1SinghJaiseljs6897.pdf" 1758830150.3161 0
+  "/Users/jaiselsingh/Desktop/coursework/computational_aspects_of_robotics/hw1SinghJaiseljs6897.pdf.tex" 1758830149.67737 11427 f6b374c7fbfca913c86fef8bd9714c99 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1136849721 2971 def0b6c1f0b107b3b936def894055589 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/jknappen/ec/ecbx1095.tfm" 1136768653 3584 21b378cca2e40816b0e6d74a4dc98f04 ""
@@ -88,8 +88,8 @@
   "/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1757996666 5467155 19efa205003f9ecad95fbbaa6ff24da1 ""
   "/usr/local/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1741450574 3345740 46b66fdb0378f7bf5921b5eabf1762b8 ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
-  "hw1SinghJaiseljs6897.pdf.aux" 1758748762.94951 735 7420cc19343a8256ed2c8d3ee9209ef1 "pdflatex"
-  "hw1SinghJaiseljs6897.pdf.tex" 1758748762.37747 11427 6afe46ca2070a23defd96848f451c053 ""
+  "hw1SinghJaiseljs6897.pdf.aux" 1758830150.242 735 7420cc19343a8256ed2c8d3ee9209ef1 "pdflatex"
+  "hw1SinghJaiseljs6897.pdf.tex" 1758830149.67737 11427 f6b374c7fbfca913c86fef8bd9714c99 ""
   (generated)
   "hw1SinghJaiseljs6897.pdf.aux"
   "hw1SinghJaiseljs6897.pdf.log"
