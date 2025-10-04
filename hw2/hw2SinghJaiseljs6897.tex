@@ -1,5 +1,6 @@
 \documentclass[11pt]{article}
 \usepackage{amsmath} % For math symbols
+\usepackage{amssymb} % For checkmark and other symbols
 \usepackage{array} % For better tables
 \usepackage{booktabs} % For professional-looking tables
 \title{COMS 4733 Homework 2}
@@ -200,6 +201,7 @@ With 8-connected movement where diagonal moves cost $\sqrt{2}$ and cardinal move
 \end{itemize}
 
 Therefore, the Euclidean distance heuristic is admissible for this cost model.
+
 \subsubsection{Propose a different admissible heuristic}
 
 \textbf{Answer:} The Chebyshev distance (L$^\infty$ norm) is an admissible heuristic for this cost model:
@@ -233,6 +235,71 @@ To show admissibility, we verify that this heuristic never overestimates:
 Therefore, the Chebyshev distance never overestimates the true cost and is admissible.
 
 \textbf{Alternative:} Any scaled Manhattan distance of the form $h(n) = c \cdot (|x_g - x| + |y_g - y|)$ where $c \leq \frac{\sqrt{2}}{2} \approx 0.707$ is also admissible, though it provides a looser bound than Chebyshev distance.
+
+\subsection{PRM Construction and Search}
+
+\subsubsection{Task 1: Discard samples inside obstacle}
+
+The obstacle is defined by corners at $(4,4)$ and $(6,6)$, forming a rectangle where $4 \leq x \leq 6$ and $4 \leq y \leq 6$.
+
+Checking each sample:
+\begin{itemize}
+    \item $(2,2)$: Outside obstacle
+    \item $(3,7)$: Outside obstacle
+    \item $(5,2)$: Outside obstacle
+    \item $(7,3)$: Outside obstacle
+    \item $(8,5)$: Outside obstacle
+    \item $(5,8)$: Outside obstacle
+    \item $(3,3)$: Outside obstacle
+    \item $(8,8)$: Outside obstacle
+    \item $(5,5)$: \textbf{Inside obstacle - discarded}
+\end{itemize}
+
+\textbf{Result:} 8 valid samples remain after discarding $(5,5)$.
+
+\subsubsection{Task 2: Connect samples within radius $r = 2.5$}
+
+Computing Euclidean distances between all pairs of valid samples (including start and goal), we connect pairs with distance $\leq 2.5$:
+
+\textbf{Edges created:}
+\begin{itemize}
+    \item Start $(1,1)$ to $(2,2)$: $d = \sqrt{2} \approx 1.41$
+    \item $(2,2)$ to $(3,3)$: $d = \sqrt{2} \approx 1.41$
+    \item $(3,3)$ to $(5,2)$: $d = \sqrt{5} \approx 2.24$
+    \item $(3,7)$ to $(5,8)$: $d = \sqrt{5} \approx 2.24$
+    \item $(5,2)$ to $(7,3)$: $d = \sqrt{5} \approx 2.24$
+    \item $(7,3)$ to $(8,5)$: $d = \sqrt{5} \approx 2.24$
+    \item $(8,8)$ to Goal $(9,9)$: $d = \sqrt{2} \approx 1.41$
+\end{itemize}
+
+\subsubsection{Task 3: Resulting roadmap}
+
+The constructed PRM graph has two disconnected components:
+\begin{itemize}
+    \item \textbf{Left component:} Start $(1,1) \rightarrow (2,2) \rightarrow (3,3) \rightarrow (5,2) \rightarrow (7,3) \rightarrow (8,5)$ and $(3,7) \rightarrow (5,8)$
+    \item \textbf{Right component:} $(8,8) \rightarrow$ Goal $(9,9)$
+\end{itemize}
+
+\subsubsection{Task 4: Search algorithm}
+
+Running Dijkstra's algorithm from Start $(1,1)$:
+
+The algorithm explores all nodes reachable from the start but cannot reach the goal because the graph is disconnected. The search terminates without finding a path.
+
+\subsubsection{Task 5: Results and connectivity analysis}
+
+\textbf{Path length:} No path exists.
+
+\textbf{Number of nodes expanded:} Dijkstra's expands all nodes in the connected component containing the start: Start, $(2,2)$, $(3,3)$, $(3,7)$, $(5,2)$, $(5,8)$, $(7,3)$, $(8,5)$ = 8 nodes.
+
+\textbf{Explanation:} The PRM fails to find a path because the roadmap is disconnected. The obstacle at $(4,4)$ to $(6,6)$ combined with the connection radius $r = 2.5$ creates a gap that prevents connectivity between the left and right sides of the workspace. The samples near the obstacle are too far apart to bridge this gap.
+
+\textbf{Suggestions to improve connectivity:}
+\begin{enumerate}
+    \item \textbf{Increase connection radius:} Setting $r \geq 3.0$ would allow connections like $(5,8)$ to $(8,8)$ (distance = 3.0), bridging the gap around the obstacle
+    \item \textbf{Add more samples:} Generating additional random samples, particularly in the region around the obstacle (e.g., near $(7,7)$ or $(3,5)$), would increase the likelihood of creating bridging connections
+    \item \textbf{Use both approaches:} Combining more samples with a larger connection radius provides the most robust solution for ensuring connectivity
+\end{enumerate}
 
 
 
