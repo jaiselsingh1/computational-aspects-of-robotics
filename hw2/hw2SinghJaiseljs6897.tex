@@ -3,6 +3,8 @@
 \usepackage{amssymb} % For checkmark and other symbols
 \usepackage{array} % For better tables
 \usepackage{booktabs} % For professional-looking tables
+\usepackage{graphicx}
+
 \title{COMS 4733 Homework 2}
 \author{Jaisel Singh}
 \date{\today}
@@ -279,6 +281,14 @@ The constructed PRM graph has two disconnected components:
     \item \textbf{Left component:} Start $(1,1) \rightarrow (2,2) \rightarrow (3,3) \rightarrow (5,2) \rightarrow (7,3) \rightarrow (8,5)$ and $(3,7) \rightarrow (5,8)$
     \item \textbf{Right component:} $(8,8) \rightarrow$ Goal $(9,9)$
 \end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{roadmapimg.png}
+    \caption{Constructed PRM roadmap showing valid samples (blue), start (green), goal (red), obstacle (gray), and edges connecting nodes within radius $r = 2.5$.}
+    \label{fig:prm_roadmap}
+\end{figure}
+
 
 \subsubsection{Task 4: Search algorithm}
 
