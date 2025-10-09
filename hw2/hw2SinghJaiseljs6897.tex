@@ -4,6 +4,9 @@
 \usepackage{array} % For better tables
 \usepackage{booktabs} % For professional-looking tables
 \usepackage{graphicx}
+\usepackage{float}      % for [H] placement
+\usepackage{xcolor,colortbl}  % for row colors
+
 
 \title{COMS 4733 Homework 2}
 \author{Jaisel Singh}
@@ -311,7 +314,60 @@ The algorithm explores all nodes reachable from the start but cannot reach the g
     \item \textbf{Use both approaches:} Combining more samples with a larger connection radius provides the most robust solution for ensuring connectivity
 \end{enumerate}
 
-\section{Problem 2: Randomly-Exploring Random Trees}
+\section{Problem 2: Rapidly-Exploring Random Trees (RRT)}
+
+\subsection{Hand-Simulated RRT Growth}
+
+This section presents a hand-simulated construction of a Rapidly-Exploring Random Tree (RRT) for the workspace defined in Problem 1(d).  
+The simulation is carried out for ten iterations, starting from the initial configuration $q_{\text{start}} = (1,1)$ and using the following parameters:
+
+\begin{itemize}
+    \item Step size: $\eta = 1.5$
+    \item Goal bias: $p_{\text{goal}} = 0.10$
+    \item Collision-check resolution: $\delta = 0.25$
+\end{itemize}
+
+Random samples $q_{\text{rand}}$ are drawn uniformly from the free configuration space, excluding the rectangular obstacle with corners at $(4,4)$ and $(6,6)$.  
+At each iteration, the nearest node $q_{\text{near}}$ is identified, an extension is attempted toward $q_{\text{rand}}$ up to distance $\eta$, and the resulting segment is collision-checked before being added to the tree.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{c c c c c c}
+\toprule
+\textbf{Iter} & \textbf{Sample Type} & \textbf{$q_{\text{rand}}$} & \textbf{$q_{\text{near}}$} & \textbf{$q_{\text{new}}$} & \textbf{Collision / Edge} \\
+\midrule
+1 & Uniform & (8.18, 9.59) & (1.00, 1.00) & (1.96, 2.15) & No / Yes \\
+2 & Uniform & (5.62, 7.21) & (1.96, 2.15) & (2.84, 3.37) & No / Yes \\
+3 & Uniform & (0.54, 7.03) & (2.84, 3.37) & (2.04, 4.64) & No / Yes \\
+4 & Uniform & (7.10, 3.22) & (2.84, 3.37) & (4.34, 3.31) & No / Yes \\
+\rowcolor{red!10}
+5 & Uniform & (9.48, 9.93) & (4.34, 3.31) & (5.26, 4.50) & \textbf{Yes / No} \\
+6 & Uniform & (1.83, 1.35) & (1.96, 2.15) & (1.83, 1.35) & No / Yes \\
+7 & Uniform & (8.32, 1.63) & (4.34, 3.31) & (5.72, 2.73) & No / Yes \\
+8 & Uniform & (3.12, 4.95) & (2.04, 4.64) & (3.12, 4.95) & No / Yes \\
+9 & Uniform & (0.41, 5.46) & (2.04, 4.64) & (0.70, 5.31) & No / Yes \\
+10 & Uniform & (4.33, 7.34) & (3.12, 4.95) & (3.80, 6.29) & No / Yes \\
+\bottomrule
+\end{tabular}
+\caption{Hand-simulated RRT growth over 10 iterations. The edge in iteration 5 was discarded due to a collision with the obstacle.}
+\label{tab:rrt_growth}
+\end{table}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{rrt_growth.png}
+    \caption{RRT after 10 iterations. Nodes are shown in blue, valid edges in black, the obstacle in gray, and start/goal in green/red.}
+    \label{fig:rrt_growth}
+\end{figure}
+
+\textbf{Discussion.}
+The tree expands systematically from the start toward unexplored regions of the workspace, demonstrating the RRT’s characteristic space-filling behavior.  
+Only one attempted extension (Iteration 5) intersects the obstacle and is therefore rejected. After ten iterations, the tree contains nine valid edges and ten nodes, covering much of the lower-left to mid-right workspace.
+
+The simulated results highlight how local collision constraints restrict branch expansion near the obstacle region and how random sampling ensures broad workspace coverage even with a small number of iterations.
+
 
 
 
