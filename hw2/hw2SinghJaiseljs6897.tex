@@ -368,8 +368,66 @@ Only one attempted extension (Iteration 5) intersects the obstacle and is theref
 
 The simulated results highlight how local collision constraints restrict branch expansion near the obstacle region and how random sampling ensures broad workspace coverage even with a small number of iterations.
 
+% Problem 2(b): Goal bias and step size analysis
 
+\subsection{Goal bias and step size analysis}
 
+\subsubsection{Question 1: Effect of increasing $p_{\text{goal}}$}
+
+\textbf{(i) Speed of reaching the goal region:}
+
+Increasing $p_{\text{goal}}$ \textbf{increases the speed} of reaching the goal. A higher goal bias means the algorithm samples the goal location more frequently, which directly pulls the tree toward the goal. This creates more edges pointing in the goal direction, accelerating convergence. In our simulation with $p_{\text{goal}} = 0.10$, no goal-biased samples occurred in 10 iterations. If we had set $p_{\text{goal}} = 0.50$, approximately 5 of the 10 samples would have been at the goal location $(9,9)$, creating direct paths toward the target.
+
+\textbf{(ii) Diversity/coverage of explored space:}
+
+Increasing $p_{\text{goal}}$ \textbf{decreases diversity and coverage} of the explored space. A higher goal bias creates a strong directional preference toward the goal, meaning the tree explores less of the overall workspace. The tree becomes more focused on reaching the goal and less exploratory of alternative regions. This reduces the coverage of the free space, which can be problematic if indirect paths are necessary.
+
+\textbf{When can a large $p_{\text{goal}}$ hurt performance?}
+
+A large goal bias can hurt performance in several scenarios:
+\begin{itemize}
+    \item \textbf{Narrow passages or complex obstacles:} When obstacles directly block the path between start and goal, an aggressive goal bias causes the tree to repeatedly attempt the same blocked direction, wasting samples without making progress toward finding alternative routes.
+    
+    \item \textbf{Exploration-dependent environments:} When the workspace requires exploring around obstacles before approaching the goal, a high $p_{\text{goal}}$ prevents the tree from discovering these necessary detours. In our example, if the obstacle were larger or positioned directly between start and goal, we would need to explore sideways or around before heading toward $(9,9)$.
+    
+    \item \textbf{Local minima:} The tree may get trapped in local configurations where all direct extensions toward the goal collide, and insufficient exploration prevents finding alternative paths.
+\end{itemize}
+
+The optimal $p_{\text{goal}}$ balances exploitation (moving toward the goal) with exploration (discovering diverse paths through the free space).
+
+\subsubsection{Question 2: Trade-offs in choosing $\eta$ (step size)}
+
+The step size $\eta$ controls how far the tree extends toward each random sample. Choosing $\eta$ involves important trade-offs:
+
+\textbf{If $\eta$ is much larger than typical obstacle feature sizes:}
+\begin{itemize}
+    \item \textbf{Problem:} Large steps may ``jump over'' narrow passages or small gaps in obstacles, causing the tree to miss valid paths that require precision navigation
+    \item The tree cannot navigate through tight spaces because each extension is too coarse
+    \item May fail to find feasible paths even when they exist
+    \item \textbf{Example:} If $\eta = 5$ in our $10 \times 10$ workspace, a single step from $(1,1)$ could reach $(6,1)$, potentially jumping through the obstacle boundary without the collision checker detecting intermediate points properly
+\end{itemize}
+
+\textbf{If $\eta$ is much smaller than obstacle feature sizes:}
+\begin{itemize}
+    \item \textbf{Problem:} Very slow progress and inefficient exploration of the workspace
+    \item Takes many iterations to make meaningful distance toward the goal
+    \item Computational cost increases dramatically as more nodes are needed
+    \item \textbf{Example:} If $\eta = 0.1$, traversing the diagonal distance from $(1,1)$ to $(9,9)$ (approximately 11.3 units) would require over 100 iterations just for the direct path, not accounting for obstacle avoidance
+\end{itemize}
+
+\textbf{Trade-off and rule of thumb:}
+
+The optimal $\eta$ should be proportional to the smallest obstacle features or clearances that must be navigated:
+\begin{itemize}
+    \item \textbf{Rule of thumb:} Set $\eta \approx 0.5$ to $2$ times the minimum clearance or gap width
+    \item Too large: miss narrow passages
+    \item Too small: inefficient, slow convergence
+    \item For our workspace with a $2 \times 2$ obstacle in a $10 \times 10$ space, $\eta = 1.5$ provides a reasonable balance between exploration efficiency and the ability to navigate around the obstacle
+\end{itemize}
+
+The step size should be large enough to make efficient progress but small enough to respect the geometric constraints of the environment.
+
+\subsection{Collision Checking Resolution}
 
 
 
