@@ -810,12 +810,166 @@ Therefore:
 
 \textbf{Physical meaning:} Distant objects appear smaller and all points at infinity project to the principal point $(c_x, c_y)$, the vanishing point where the optical axis meets the image plane. This is why parallel lines (e.g., railroad tracks) appear to converge at the horizon.
 
+\subsection{Extrinsic Parameters and Full Projection Matrix}
 
+Suppose the camera frame is related to the world frame by a rotation $R \in SO(3)$ and translation $t \in \mathbb{R}^3$. In homogeneous coordinates:
+\[
+\begin{bmatrix} P_c \\ 1 \end{bmatrix} = \begin{bmatrix} R & t \\ 0 & 1 \end{bmatrix} \begin{bmatrix} P_w \\ 1 \end{bmatrix}
+\]
 
+\subsubsection*{Part 1: Derive the full projection equation}
 
+Starting from part (a), we have the intrinsic projection:
+\[
+\lambda \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = K \begin{bmatrix} X_c \\ Y_c \\ Z_c \end{bmatrix}
+\]
+where $(X_c, Y_c, Z_c)$ are coordinates in the camera frame.
 
+The extrinsic transformation relates world coordinates to camera coordinates:
+\[
+\begin{bmatrix} X_c \\ Y_c \\ Z_c \\ 1 \end{bmatrix} = \begin{bmatrix} R & t \\ 0 & 1 \end{bmatrix} \begin{bmatrix} X_w \\ Y_w \\ Z_w \\ 1 \end{bmatrix}
+\]
 
+This gives:
+\[
+\begin{bmatrix} X_c \\ Y_c \\ Z_c \end{bmatrix} = R \begin{bmatrix} X_w \\ Y_w \\ Z_w \end{bmatrix} + t
+\]
 
+Substituting into the intrinsic projection equation:
+\[
+\lambda \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = K \left( R \begin{bmatrix} X_w \\ Y_w \\ Z_w \end{bmatrix} + t \right)
+\]
+
+Expanding:
+\[
+\lambda \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = K R \begin{bmatrix} X_w \\ Y_w \\ Z_w \end{bmatrix} + K t
+\]
+
+To express this in homogeneous form, we can write:
+\[
+\lambda \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = K [R \mid t] \begin{bmatrix} X_w \\ Y_w \\ Z_w \\ 1 \end{bmatrix}
+\]
+
+where $[R \mid t]$ is the $3 \times 4$ matrix formed by concatenating $R$ (3×3) and $t$ (3×1).
+
+\textbf{Full projection equation:}
+\[
+\boxed{\lambda \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = K [R \mid t] \begin{bmatrix} X_w \\ Y_w \\ Z_w \\ 1 \end{bmatrix}}
+\]
+
+The combined matrix $P = K [R \mid t]$ is a $3 \times 4$ projection matrix.
+
+\textbf{Homogeneous normalization:}
+
+After computing the matrix multiplication, we obtain:
+\[
+\lambda \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = \begin{bmatrix} p_1 \\ p_2 \\ p_3 \end{bmatrix}
+\]
+
+where $p_1, p_2, p_3$ are the three rows of the result. The homogeneous normalization divides by the third component:
+\[
+\lambda = p_3
+\]
+
+Therefore:
+\[
+u = \frac{p_1}{\lambda} = \frac{p_1}{p_3}, \quad v = \frac{p_2}{\lambda} = \frac{p_2}{p_3}
+\]
+
+This converts from homogeneous coordinates to pixel coordinates $(u, v)$.
+
+\textbf{Alternative explicit form:}
+
+Let $P_c = R P_w + t = (X_c, Y_c, Z_c)^\top$. Then from part (a):
+\[
+u = f_x \frac{X_c}{Z_c} + c_x, \quad v = f_y \frac{Y_c}{Z_c} + c_y
+\]
+
+where:
+\[
+\begin{bmatrix} X_c \\ Y_c \\ Z_c \end{bmatrix} = R \begin{bmatrix} X_w \\ Y_w \\ Z_w \end{bmatrix} + t
+\]
+
+\subsubsection*{Part 2: Geometric interpretation of $R$ and $t$}
+
+\textbf{Rotation matrix $R$:}
+
+$R \in SO(3)$ represents the \textit{orientation} of the camera frame relative to the world frame. Specifically, $R$ transforms vectors from world coordinates to camera coordinates by rotating them. The columns of $R$ are the world-frame representations of the camera's coordinate axes.
+
+Alternatively, $R$ describes how the camera is rotated relative to the world. For example:
+\begin{itemize}
+    \item If $R = I$ (identity), the camera axes are aligned with the world axes
+    \item $R$ captures effects like pan, tilt, and roll of the camera
+\end{itemize}
+
+\textbf{Translation vector $t$:}
+
+$t \in \mathbb{R}^3$ represents the \textit{position} of the world origin as expressed in the camera coordinate frame. In other words, $t$ is the vector from the camera origin to the world origin, represented in camera coordinates.
+
+\textbf{Note:} The camera center's position in world coordinates is $-R^\top t$ (since $R$ is orthogonal, $R^{-1} = R^\top$). This is because if we solve $0 = R P_w + t$ for $P_w$, we get $P_w = -R^{-1} t = -R^\top t$.
+
+\textbf{Summary:}
+\begin{itemize}
+    \item $R$: Rotates world vectors into camera frame (camera orientation)
+    \item $t$: Translates world origin to camera frame (position of world origin in camera coordinates)
+    \item Together, $[R \mid t]$ forms the extrinsic parameters that relate world and camera frames
+\end{itemize}
+
+\subsection{Camera Callibration}
+\subsubsection*{Part 1: 3D Stereo Reconstruction}
+In stereo vision, depth $Z$ is recovered from disparity $d$ (the difference in pixel positions between left and right images) using:
+\[
+Z = \frac{f \cdot b}{d}
+\]
+where $f$ is the focal length and $b$ is the baseline (distance between cameras).
+
+\textbf{Why calibration is critical:}
+
+\begin{itemize}
+    \item \textbf{Intrinsic parameters ($f_x, f_y, c_x, c_y$)}: Errors in focal length $f$ directly scale depth estimates. If the calibrated focal length is off by 5\%, depth estimates will be systematically wrong by 5\%. Incorrect principal points $(c_x, c_y)$ cause errors in computing disparity $d$, as the correspondence search assumes correct image centers.
+    
+    \item \textbf{Extrinsic parameters ($R, t$)}: The relative pose between left and right cameras must be known precisely. Even small rotation errors (e.g., 1° misalignment) cause incorrect rectification, leading to vertical disparities that violate the epipolar constraint and degrade matching accuracy. Translation errors directly affect the baseline $B$, causing proportional depth errors.
+    
+    \item \textbf{Mathematical impact}: If the true depth is $Z$ but we use incorrect focal length $\hat{f} = f + \Delta f$, the estimated depth becomes:
+    \[
+    \hat{Z} = \frac{\hat{f} \cdot B}{d} = \frac{(f + \Delta f) \cdot B}{d} = Z + \frac{\Delta f \cdot B}{d}
+    \]
+    The depth error grows linearly with $\Delta f$ and inversely with disparity $d$ (larger for distant objects).
+\end{itemize}
+
+\textbf{Consequences of poor calibration:} Inaccurate 3D point clouds lead to errors in obstacle detection, navigation, and manipulation. For instance, a robot might misjudge the distance to an object and collide with it or fail to grasp it.
+
+\subsubsection*{Part 2: Visual servoing or eye-in-hand control}
+
+Visual servoing controls robot motion by minimizing image-space errors $(\Delta u, \Delta v)$ between current and desired feature positions. The mapping from image error to Cartesian error $(\Delta X, \Delta Y, \Delta Z)$ requires the image Jacobian, which depends on camera parameters.
+
+\textbf{Why calibration is critical:}
+
+From the projection equations $u = f_x \frac{X}{Z} + c_x$ and $v = f_y \frac{Y}{Z} + c_y$, we can compute the image Jacobian relating Cartesian velocity to image velocity. Taking differentials:
+\[
+\Delta u \approx \frac{\partial u}{\partial X} \Delta X + \frac{\partial u}{\partial Y} \Delta Y + \frac{\partial u}{\partial Z} \Delta Z = \frac{f_x}{Z} \Delta X - \frac{f_x X}{Z^2} \Delta Z
+\]
+\[
+\Delta v \approx \frac{\partial v}{\partial X} \Delta X + \frac{\partial v}{\partial Y} \Delta Y + \frac{\partial v}{\partial Z} \Delta Z = \frac{f_y}{Z} \Delta Y - \frac{f_y Y}{Z^2} \Delta Z
+\]
+
+The image Jacobian $J$ maps Cartesian motion to image motion:
+\[
+\begin{bmatrix} \Delta u \\ \Delta v \end{bmatrix} \approx J \begin{bmatrix} \Delta X \\ \Delta Y \\ \Delta Z \end{bmatrix}
+\]
+
+\textbf{Mathematical impact:}
+
+\begin{itemize}
+    \item \textbf{Intrinsic errors}: If $f_x$ or $f_y$ are incorrect, the Jacobian entries scale incorrectly, causing the robot to move too much or too little in response to image errors. For example, if the calibrated $\hat{f}_x = 1.1 f_x$ (10\% error), the robot will command 10\% smaller motions than needed, resulting in slow convergence or steady-state error.
+    
+    \item \textbf{Extrinsic errors}: The transformation $[R \mid t]$ relates camera frame motion to robot frame motion. If $R$ or $t$ are wrong, the computed Cartesian corrections $(\Delta X, \Delta Y, \Delta Z)$ will be in the wrong direction or magnitude, causing the robot to move incorrectly. For instance, a 5° rotation error could cause the robot to move perpendicular to the intended direction.
+    
+    \item \textbf{Depth dependence}: The Jacobian depends on depth $Z$. If depth is estimated incorrectly due to calibration errors, the commanded velocities will be wrong. Since terms like $\frac{f_x}{Z}$ appear, a 20\% error in $Z$ causes a 20\% error in the velocity gain.
+\end{itemize}
+
+\textbf{Consequences of poor calibration:} The robot may fail to align with the target, oscillate due to incorrect feedback gains, or become unstable. In precision tasks like assembly or surgical operations, even small calibration errors can cause task failure or damage.
 
 \end{document}
+
 
