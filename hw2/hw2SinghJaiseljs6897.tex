@@ -43,7 +43,7 @@ A* (admissible $h$) & Yes & Yes & $O(b^d)$ & $O(b^d)$ \\
 \label{tab:search_comparison}
 \end{table}
 
-\subsubsection{Justification for Selected Entries}
+\subsubsection*{Justification for Selected Entries}
 
 \textbf{Dijkstra's Algorithm - Time Complexity: $O(b^d)$}
 
@@ -184,7 +184,7 @@ Using the Manhattan distance heuristic $h(x,y) = |3-x| + |3-y|$ and lexicographi
 
 \subsection{Heuristic Admissibility}
 
-\subsubsection{Is Euclidean distance admissible?}
+\subsubsection*{Is Euclidean distance admissible?}
 
 \textbf{Answer:} Yes, the Euclidean distance heuristic $h(n) = \sqrt{(x_g - x)^2 + (y_g - y)^2}$ is admissible for this cost model.
 
@@ -207,7 +207,7 @@ With 8-connected movement where diagonal moves cost $\sqrt{2}$ and cardinal move
 
 Therefore, the Euclidean distance heuristic is admissible for this cost model.
 
-\subsubsection{Propose a different admissible heuristic}
+\subsubsection*{Propose a different admissible heuristic}
 
 \textbf{Answer:} The Chebyshev distance (L$^\infty$ norm) is an admissible heuristic for this cost model:
 $$h(n) = \max(|x_g - x|, |y_g - y|)$$
@@ -243,7 +243,7 @@ Therefore, the Chebyshev distance never overestimates the true cost and is admis
 
 \subsection{PRM Construction and Search}
 
-\subsubsection{Task 1: Discard samples inside obstacle}
+\subsubsection*{Task 1: Discard samples inside obstacle}
 
 The obstacle is defined by corners at $(4,4)$ and $(6,6)$, forming a rectangle where $4 \leq x \leq 6$ and $4 \leq y \leq 6$.
 
@@ -262,7 +262,7 @@ Checking each sample:
 
 \textbf{Result:} 8 valid samples remain after discarding $(5,5)$.
 
-\subsubsection{Task 2: Connect samples within radius $r = 2.5$}
+\subsubsection*{Task 2: Connect samples within radius $r = 2.5$}
 
 Computing Euclidean distances between all pairs of valid samples (including start and goal), we connect pairs with distance $\leq 2.5$:
 
@@ -277,7 +277,7 @@ Computing Euclidean distances between all pairs of valid samples (including star
     \item $(8,8)$ to Goal $(9,9)$: $d = \sqrt{2} \approx 1.41$
 \end{itemize}
 
-\subsubsection{Task 3: Resulting roadmap}
+\subsubsection*{Task 3: Resulting roadmap}
 
 The constructed PRM graph has two disconnected components:
 \begin{itemize}
@@ -293,13 +293,13 @@ The constructed PRM graph has two disconnected components:
 \end{figure}
 
 
-\subsubsection{Task 4: Search algorithm}
+\subsubsection*{Task 4: Search algorithm}
 
 Running Dijkstra's algorithm from Start $(1,1)$:
 
 The algorithm explores all nodes reachable from the start but cannot reach the goal because the graph is disconnected. The search terminates without finding a path.
 
-\subsubsection{Task 5: Results and connectivity analysis}
+\subsubsection*{Task 5: Results and connectivity analysis}
 
 \textbf{Path length:} No path exists.
 
@@ -372,7 +372,7 @@ The simulated results highlight how local collision constraints restrict branch 
 
 \subsection{Goal bias and step size analysis}
 
-\subsubsection{Question 1: Effect of increasing $p_{\text{goal}}$}
+\subsubsection*{Question 1: Effect of increasing $p_{\text{goal}}$}
 
 \textbf{(i) Speed of reaching the goal region:}
 
@@ -395,7 +395,7 @@ A large goal bias can hurt performance in several scenarios:
 
 The optimal $p_{\text{goal}}$ balances exploitation (moving toward the goal) with exploration (discovering diverse paths through the free space).
 
-\subsubsection{Question 2: Trade-offs in choosing $\eta$ (step size)}
+\subsubsection*{Question 2: Trade-offs in choosing $\eta$ (step size)}
 
 The step size $\eta$ controls how far the tree extends toward each random sample. Choosing $\eta$ involves important trade-offs:
 
@@ -429,6 +429,393 @@ The step size should be large enough to make efficient progress but small enough
 
 \subsection{Collision Checking Resolution}
 
+If the interpolation resolution $\delta$ is too coarse, the planner may miss collisions: two endpoints might be free while the segment between them crosses an obstacle. For example, an edge from $(3.5, 4.0)$ to $(6.5, 4.0)$ with $\delta = 2.0$ would only check the endpoints (both free), missing the collision in the middle where it passes through the obstacle.
+
+If $\delta$ is too fine, computation becomes inefficient due to redundant checks. An edge of length 1.5 requires 6 checks with $\delta = 0.25$ but 150 checks with $\delta = 0.01$, providing minimal benefit.
+
+A practical rule of thumb is to set $\delta$ between $\frac{1}{5}$ and $\frac{1}{2}$ of the minimum obstacle feature size. For our $2 \times 2$ obstacle, $\delta \approx 0.25$ is appropriate.
+
+\subsection{Completeness and Planner Choice}
+
+\textbf{(1)} Vanilla RRT is \textit{probabilistically complete}. If a collision-free path exists and the free space is connected, then as the number of samples $N \to \infty$, the probability that RRT finds a valid path approaches 1. Random sampling ensures that every region of free space will eventually be explored through the Voronoi bias property, which preferentially extends the tree toward unexplored regions.
+
+\textbf{(2)} For a \textit{single-query} problem with tight time limits, RRT is preferred since it incrementally builds a tree from the start and can quickly reach the goal without precomputing a global roadmap. 
+
+For a \textit{multi-query} setting where many start/goal pairs share the same workspace, PRM is preferred because its precomputed roadmap amortizes construction cost across many queries. After initial construction, each query only requires connecting the start/goal to the existing roadmap and running a graph search, which is much cheaper than rebuilding a tree from scratch for each query.
+
+\subsection{RRT*}
+
+RRT* is \textit{asymptotically optimal}, meaning that as the number of samples $N \to \infty$, the cost of the best path in the tree converges to the optimal path cost. 
+
+It introduces a \textit{rewiring step}, in which nearby nodes within a shrinking radius are reconnected if the new connection through $q_{\text{new}}$ yields a lower cumulative cost. Additionally, when adding $q_{\text{new}}$, RRT* selects the best parent from nearby nodes rather than simply the nearest node. 
+
+This local improvement process increases path quality at the expense of additional nearest-neighbor searches and collision checks per iteration, increasing computational cost compared to vanilla RRT. However, the resulting paths converge to optimality, whereas vanilla RRT paths can be arbitrarily suboptimal.
+
+\section{Problem 3: Position Control and Impedance Control}
+\subsection{PD Position Control}
+\subsubsection*{Part 1: Closed-loop differential equation}
+
+Given the PD controller:
+\[
+u = -K_p e - K_d \dot{x}
+\]
+
+Substituting into the dynamics $m\ddot{x} = u$:
+\[
+m\ddot{x} = -K_p e - K_d \dot{x}
+\]
+
+Since $e = x - x_d$ and $x_d$ is constant (desired position doesn't change), we have:
+\begin{align*}
+\dot{e} &= \dot{x} \\
+\ddot{e} &= \ddot{x}
+\end{align*}
+
+Substituting $\ddot{x} = \ddot{e}$ and $\dot{x} = \dot{e}$ into the equation:
+\[
+m\ddot{e} = -K_p e - K_d \dot{e}
+\]
+
+Rearranging to standard form:
+\[
+\boxed{m\ddot{e} + K_d \dot{e} + K_p e = 0}
+\]
+
+This is the closed-loop differential equation in terms of error $e$.
+
+\subsubsection*{Part 2: Characteristic equation and stability conditions}
+
+To find the characteristic equation, we assume a solution of the form $e(t) = e^{\lambda t}$, where $\lambda$ is the characteristic root (eigenvalue).
+
+Substituting into the differential equation:
+\begin{align*}
+m\lambda^2 e^{\lambda t} + K_d \lambda e^{\lambda t} + K_p e^{\lambda t} &= 0 \\
+e^{\lambda t}(m\lambda^2 + K_d \lambda + K_p) &= 0
+\end{align*}
+
+Since $e^{\lambda t} \neq 0$, the characteristic equation is:
+\[
+\boxed{m\lambda^2 + K_d \lambda + K_p = 0}
+\]
+
+\textbf{Stability conditions:}
+
+For the system to be asymptotically stable, both eigenvalues must have negative real parts. For a second-order polynomial $a\lambda^2 + b\lambda + c = 0$ to have roots with negative real parts, we require:
+\begin{itemize}
+\item All coefficients must be positive: $a > 0$, $b > 0$, $c > 0$
+\end{itemize}
+
+Applying this to our characteristic equation:
+\begin{align*}
+m &> 0 \quad \text{(always true, mass is positive)} \\
+K_d &> 0 \\
+K_p &> 0
+\end{align*}
+
+Therefore, the stability conditions are:
+\[
+\boxed{K_p > 0 \quad \text{and} \quad K_d > 0}
+\]
+
+\textbf{Why these conditions ensure stability:}
+
+When both coefficients are positive, the characteristic polynomial satisfies the Routh-Hurwitz criterion for second-order systems. This guarantees that:
+\begin{itemize}
+\item If the roots are real, both are negative
+\item If the roots are complex conjugates $\lambda = \alpha \pm j\omega$, then $\alpha < 0$ (negative real part)
+\end{itemize}
+
+In both cases, solutions decay exponentially: $e(t) \to 0$ as $t \to \infty$.
+
+\subsubsection*{Part 3: Natural Frequency $\omega$ and Damping Ratio $\zeta$}
+Given: $m = 2$ kg, $K_p = 10$, $K_d = 6$
+
+The standard form of a second-order system is:
+\[
+\ddot{e} + 2\zeta\omega_n \dot{e} + \omega_n^2 e = 0
+\]
+
+Dividing our closed-loop equation by $m$:
+\[
+\ddot{e} + \frac{K_d}{m}\dot{e} + \frac{K_p}{m}e = 0
+\]
+
+Comparing coefficients:
+\begin{align*}
+\omega_n^2 &= \frac{K_p}{m} \\
+2\zeta\omega_n &= \frac{K_d}{m}
+\end{align*}
+
+\textbf{Natural frequency:}
+\[
+\omega_n = \sqrt{\frac{K_p}{m}} = \sqrt{\frac{10}{2}} = \sqrt{5} \approx 2.236 \text{ rad/s}
+\]
+
+\textbf{Damping ratio:}
+
+From $2\zeta\omega_n = \frac{K_d}{m}$:
+\[
+\zeta = \frac{K_d}{2m\omega_n} = \frac{K_d}{2\sqrt{mK_p}}
+\]
+
+Substituting values:
+\[
+\zeta = \frac{6}{2\sqrt{2 \cdot 10}} = \frac{6}{2\sqrt{20}} = \frac{6}{2 \cdot 2\sqrt{5}} = \frac{6}{4\sqrt{5}} = \frac{3}{2\sqrt{5}}
+\]
+
+Rationalizing the denominator:
+\[
+\zeta = \frac{3}{2\sqrt{5}} \cdot \frac{\sqrt{5}}{\sqrt{5}} = \frac{3\sqrt{5}}{10} \approx 0.671
+\]
+
+\textbf{Results:}
+\[
+\boxed{\omega_n = \sqrt{5} \approx 2.236 \text{ rad/s}, \quad \zeta = \frac{3\sqrt{5}}{10} \approx 0.671}
+\]
+
+\textbf{System classification:}
+
+Since $0 < \zeta < 1$, the system is \textbf{underdamped}.
+
+\subsection{Effect of Gravity and Feedforward Compensation}
+
+\[
+m\ddot{x} = u - mg,
+\]
+where $g = 9.81$ m/s$^2$.
+
+\subsubsection*{Part 1: New closed-loop equation with gravity}
+
+Using the same PD controller from part (a):
+\[
+u = -K_p e - K_d \dot{x}
+\]
+
+Substituting into the dynamics:
+\[
+m\ddot{x} = -K_p e - K_d \dot{x} - mg
+\]
+
+Since $e = x - x_d$ and $x_d$ is constant:
+\begin{align*}
+\dot{e} &= \dot{x} \\
+\ddot{e} &= \ddot{x}
+\end{align*}
+
+Substituting:
+\[
+m\ddot{e} = -K_p e - K_d \dot{e} - mg
+\]
+
+Rearranging to standard form:
+\[
+\boxed{m\ddot{e} + K_d \dot{e} + K_p e = -mg}
+\]
+
+This is the new closed-loop equation with gravity. Note that the gravity term $-mg$ appears as a constant forcing term on the right-hand side.
+
+\subsubsection*{Part 2: Steady-state error without gravity compensation}
+
+At steady state, $\ddot{e} = 0$ and $\dot{e} = 0$. Substituting into the closed-loop equation:
+\[
+0 + 0 + K_p e_{ss} = -mg
+\]
+
+Solving for the steady-state error:
+\[
+\boxed{e_{ss} = -\frac{mg}{K_p}}
+\]
+
+This shows that the steady-state error is \textbf{nonzero} when there is no gravity compensation. The negative sign indicates that the actual position $x$ will be below the desired position $x_d$ by an amount $\frac{mg}{K_p}$, as the controller must maintain a constant error to balance the gravitational force.
+
+\textbf{Physical interpretation:} The proportional term $-K_p e$ must generate a force equal to $mg$ to counteract gravity at steady state. This requires a nonzero position error.
+
+\subsubsection*{Part 3: Gravity compensation eliminates steady-state error}
+
+Add a gravity-compensating term to the control input:
+\[
+u = -K_p e - K_d \dot{x} + u_g
+\]
+where $u_g = mg$.
+
+Substituting into the dynamics:
+\[
+m\ddot{x} = -K_p e - K_d \dot{x} + mg - mg = -K_p e - K_d \dot{x}
+\]
+
+The gravity terms cancel! Converting to error coordinates:
+\[
+m\ddot{e} = -K_p e - K_d \dot{e}
+\]
+
+Rearranging:
+\[
+\boxed{m\ddot{e} + K_d \dot{e} + K_p e = 0}
+\]
+
+This is identical to the gravity-free case from part (a). At steady state ($\ddot{e} = 0$, $\dot{e} = 0$):
+\[
+K_p e_{ss} = 0 \quad \Rightarrow \quad \boxed{e_{ss} = 0}
+\]
+
+\textbf{Conclusion:} The feedforward gravity compensation term $u_g = mg$ eliminates the steady-state error by directly counteracting the gravitational force, allowing the PD controller to regulate the position error to zero.
+
+\subsection{Comparing Position and Impedance Control}
+\subsubsection*{Part 1: Physical interpretation and comparison to position control}
+
+\textbf{Physical interpretation of impedance control:}
+
+Impedance control regulates the \textit{dynamic relationship} between position and force, rather than controlling position or force alone. It makes the robot behave like a mechanical system with specified mass, damping, and stiffness properties. The controller creates a virtual spring-damper-mass system that determines how the robot responds to external forces.
+
+In impedance control, when an external force $F_{ext}$ is applied, the system responds according to:
+\[
+m\ddot{e} + K_d\dot{e} + Ke = F_{ext}
+\]
+where $K$ is the virtual stiffness, $K_d$ is the virtual damping, and $m$ is the virtual mass (which may differ from the actual physical mass).
+
+\textbf{Key differences from pure position control:}
+
+\begin{itemize}
+    \item \textbf{Position control}: Rigidly drives the system to a desired position, treating deviations as errors to be eliminated. External forces are viewed as disturbances to be rejected. The system behaves like an infinitely stiff mechanism.
+    
+    \item \textbf{Impedance control}: Allows compliant interaction with the environment. The system can deviate from the desired position in response to external forces, with the amount of deviation determined by the virtual stiffness $K$. External forces cause controlled, predictable motion rather than being rejected.
+    
+    \item \textbf{Force response}: In position control, contact forces can become very large when interacting with rigid environments. In impedance control, the virtual stiffness limits contact forces and enables safe, stable interaction.
+    
+    \item \textbf{Control objective}: Position control aims to minimize position error regardless of forces. Impedance control aims to achieve a desired force-position relationship, trading position accuracy for force safety and interaction stability.
+\end{itemize}
+
+\subsubsection*{Part 2: Impact of K on System Behavior}
+
+\textbf{If $K$ is very large (high stiffness):}
+
+The system approaches \textbf{pure position control} behavior as the value of $K$ approaches $\infty$. 
+The system becomes very rigid and resists external forces strongly, maintaining position despite disturbances. However, this can lead to large contact forces and potential instability or damage when interacting with stiff environments.
+\newline
+\textbf{If $K$ is very small (low stiffness, close to zero):}
+
+The system exhibits \textbf{highly compliant behavior}. The system acts like a free mass with damping, easily displaced by external forces. Position tracking degrades significantly, but the robot can safely interact with its environment without generating large forces. The system behaves almost like it's ``floating'' with only damping providing resistance to motion.
+
+
+\subsubsection*{Part 3: Application of different stiffness values}
+There are varied use cases for the different stiffness parameter values that are chosen for the system. 
+\textbf{High K values or stiff systems} are useful for tasks when a robot must perform high-accuracy operations like drilling circuit boards or milling metal parts. Other applications could potentially be Other examples include pick-and-place operations (accurate placement), inspection tasks (maintaining sensor position), and spot welding (precise electrode positioning). \textbf{Low K values or more compliant behavior} is better suited for 
+a robot that works alongside humans (e.g., holding a workpiece while a human assembles components), as the low stiffness is more safe. If the human accidentally collides with the robot or needs to guide it manually it is more compliant to changing it's behavior and reduce chances of injury. 
+
+\section{Problem 4: Camera Models and Callibration}
+
+\subsection{Pinhole Camera Projection}
+
+The pinhole camera model maps a 3D point $P = (X, Y, Z)^\top$ in the camera coordinate frame to homogeneous image coordinates via:
+\[
+\lambda \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = \begin{bmatrix} f_x & 0 & c_x \\ 0 & f_y & c_y \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} X \\ Y \\ Z \end{bmatrix} = K \begin{bmatrix} X \\ Y \\ Z \end{bmatrix},
+\]
+where $\lambda = Z$ in the pinhole model.
+
+\subsubsection*{Part 1: Derive explicit formulas for $u$ and $v$}
+
+Multiplying out the right-hand side:
+\[
+\lambda \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = \begin{bmatrix} f_x X + c_x Z \\ f_y Y + c_y Z \\ Z \end{bmatrix}
+\]
+
+This gives us three equations:
+\begin{align}
+\lambda u &= f_x X + c_x Z \label{eq:u_scaled} \\
+\lambda v &= f_y Y + c_y Z \label{eq:v_scaled} \\
+\lambda &= Z \label{eq:lambda}
+\end{align}
+
+From equation~\eqref{eq:lambda}, we know that $\lambda = Z$. Substituting into equation~\eqref{eq:u_scaled}:
+\[
+Z u = f_x X + c_x Z
+\]
+
+Dividing both sides by $Z$ (normalizing by $\lambda$):
+\[
+u = \frac{f_x X + c_x Z}{Z} = \frac{f_x X}{Z} + c_x
+\]
+
+Similarly, substituting $\lambda = Z$ into equation~\eqref{eq:v_scaled}:
+\[
+Z v = f_y Y + c_y Z
+\]
+
+Dividing both sides by $Z$:
+\[
+v = \frac{f_y Y + c_y Z}{Z} = \frac{f_y Y}{Z} + c_y
+\]
+
+\textbf{Final formulas:}
+\[
+\boxed{u = f_x \frac{X}{Z} + c_x}
+\]
+\[
+\boxed{v = f_y \frac{Y}{Z} + c_y}
+\]
+
+These are the explicit projection formulas that map a 3D point $(X, Y, Z)$ to 2D pixel coordinates $(u, v)$ in the image plane.
+
+\subsubsection*{Part 2: Compute $(u, v)$ in pixels}
+
+Given:
+\begin{itemize}
+    \item $f_x = f_y = 800$ pixels
+    \item $c_x = 320$ pixels
+    \item $c_y = 240$ pixels
+    \item $P = (0.1, 0.05, 1.0)$ meters = $(X, Y, Z) = (0.1, 0.05, 1.0)$
+\end{itemize}
+
+Using the formulas from Part 1:
+
+\textbf{Computing $u$:}
+\[
+u = f_x \frac{X}{Z} + c_x = 800 \cdot \frac{0.1}{1.0} + 320 = 800 \cdot 0.1 + 320 = 80 + 320 = 400 \text{ pixels}
+\]
+
+\textbf{Computing $v$:}
+\[
+v = f_y \frac{Y}{Z} + c_y = 800 \cdot \frac{0.05}{1.0} + 240 = 800 \cdot 0.05 + 240 = 40 + 240 = 280 \text{ pixels}
+\]
+
+\textbf{Result:}
+\[
+\boxed{(u, v) = (400, 280) \text{ pixels}}
+\]
+
+This means the 3D point projects to pixel coordinates $(400, 280)$ in the image.
+
+\subsubsection*{Part 3: Limiting behavior as $Z \to 0^+$ and $Z \to \infty$}
+
+\textbf{Case 1: As $Z \to 0^+$ (point approaches camera center):}
+
+As $Z \to 0^+$, the terms $\frac{X}{Z}$ and $\frac{Y}{Z}$ diverge to $\pm\infty$ (unless $X = Y = 0$):
+\[
+(u, v) \to (\pm\infty, \pm\infty)
+\]
+
+\textbf{Physical meaning:} Objects extremely close to the camera appear infinitely large due to extreme perspective. The projection becomes singular at $Z = 0$ (division by zero), where the point coincides with the pinhole itself. In practice, such points lie outside any real camera's field of view.
+
+\textbf{Case 2: As $Z \to \infty$ (point moves far away):}
+
+As $Z \to \infty$:
+\[
+u = f_x \frac{X}{Z} + c_x \to c_x, \quad v = f_y \frac{Y}{Z} + c_y \to c_y
+\]
+
+Therefore:
+\[
+\boxed{(u, v) \to (c_x, c_y) \text{ as } Z \to \infty}
+\]
+
+\textbf{Physical meaning:} Distant objects appear smaller and all points at infinity project to the principal point $(c_x, c_y)$, the vanishing point where the optical axis meets the image plane. This is why parallel lines (e.g., railroad tracks) appear to converge at the horizon.
+
+
+
+
+
+
 
 
 \end{document}
+
