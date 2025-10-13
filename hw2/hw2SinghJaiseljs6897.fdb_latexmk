@@ -1,6 +1,6 @@
 # Fdb version 4
-["pdflatex"] 1760326001.6237 "/Users/jaiselsingh/Desktop/coursework/computational_aspects_of_robotics/hw2/hw2SinghJaiseljs6897.tex" "hw2SinghJaiseljs6897.pdf" "hw2SinghJaiseljs6897" 1760326002.09661 0
-  "/Users/jaiselsingh/Desktop/coursework/computational_aspects_of_robotics/hw2/hw2SinghJaiseljs6897.tex" 1760326001.45345 46188 782abf82e1c6eb80474eadcc59b1aca2 ""
+["pdflatex"] 1760326267.55862 "/Users/jaiselsingh/Desktop/coursework/computational_aspects_of_robotics/hw2/hw2SinghJaiseljs6897.tex" "hw2SinghJaiseljs6897.pdf" "hw2SinghJaiseljs6897" 1760326268.04748 0
+  "/Users/jaiselsingh/Desktop/coursework/computational_aspects_of_robotics/hw2/hw2SinghJaiseljs6897.tex" 1760326267.34814 46294 08f5ca97da1bcfc7436f659bcd017d59 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/jknappen/ec/tcrm1095.tfm" 1136768653 1536 02c06700a42be0f5a28664c7273f82e7 ""
@@ -77,8 +77,8 @@
   "/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1757996666 5467155 19efa205003f9ecad95fbbaa6ff24da1 ""
   "/usr/local/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1741450574 3345740 46b66fdb0378f7bf5921b5eabf1762b8 ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
-  "hw2SinghJaiseljs6897.aux" 1760326002.05515 3951 0643b4defcb92e04833c21a832525407 "pdflatex"
-  "hw2SinghJaiseljs6897.tex" 1760326001.45345 46188 782abf82e1c6eb80474eadcc59b1aca2 ""
+  "hw2SinghJaiseljs6897.aux" 1760326268.00582 3951 0643b4defcb92e04833c21a832525407 "pdflatex"
+  "hw2SinghJaiseljs6897.tex" 1760326267.34814 46294 08f5ca97da1bcfc7436f659bcd017d59 ""
   "roadmapimg.png" 1759956699.97465 91067 879ab6534eab2ab62a189fad2678f447 ""
   "rrt_growth.png" 1759968467.53463 151255 37237863f33c31db8c94f3f4771459f9 ""
   (generated)

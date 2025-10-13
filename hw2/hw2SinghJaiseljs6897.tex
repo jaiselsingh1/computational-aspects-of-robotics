@@ -25,24 +25,25 @@
 \noindent\textit{Note: All algorithms use graph search (visited set) on finite state space.}
 
 \begin{table}[h]
-\centering
-\begin{tabular}{|l|c|c|c|c|}
-\hline
-\textbf{Algorithm} & \textbf{Complete?} & \textbf{Cost-Optimal?} & \textbf{Time Complexity} & \textbf{Space Complexity} \\
-\hline
-DFS & Yes & No & $O(b^m)$ or $O(V + E)$ & $O(bm)$ or $O(V)$ \\
-\hline
-BFS & Yes & No & $O(b^d)$ or $O(V + E)$ & $O(b^d)$ or $O(V)$ \\
-\hline
-Dijkstra & Yes & Yes & $O(b^d)$ or $O((V + E)\log(V))$ & $O(b^d)$ or $O(V)$ \\
-\hline
-A* (admissible $h$) & Yes & Yes & $O(b^d)$ & $O(b^d)$ \\
-\hline
-\end{tabular}
-\caption{Comparison of search algorithms}
-\label{tab:search_comparison}
-\end{table}
-
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{|l|c|c|c|c|}
+    \hline
+    \textbf{Algorithm} & \textbf{Complete?} & \textbf{Cost-Optimal?} & \textbf{Time Complexity} & \textbf{Space Complexity} \\
+    \hline
+    DFS & Yes & No & $O(b^m)$ or $O(V + E)$ & $O(bm)$ or $O(V)$ \\
+    \hline
+    BFS & Yes & No & $O(b^d)$ or $O(V + E)$ & $O(b^d)$ or $O(V)$ \\
+    \hline
+    Dijkstra & Yes & Yes & $O(b^d)$ or $O((V + E)\log(V))$ & $O(b^d)$ or $O(V)$ \\
+    \hline
+    A* (admissible $h$) & Yes & Yes & $O(b^d)$ & $O(b^d)$ \\
+    \hline
+    \end{tabular}%
+    }
+    \caption{Comparison of search algorithms}
+    \label{tab:search_comparison}
+    \end{table}
 \subsubsection*{Justification for Selected Entries}
 
 \textbf{Dijkstra's Algorithm - Time Complexity: $O(b^d)$}
