@@ -30,11 +30,11 @@
 \hline
 \textbf{Algorithm} & \textbf{Complete?} & \textbf{Cost-Optimal?} & \textbf{Time Complexity} & \textbf{Space Complexity} \\
 \hline
-DFS & Yes & No & $O(b^m)$ & $O(bm)$ \\
+DFS & Yes & No & $O(b^m)$ or $O(V + E)$ & $O(bm)$ or $O(V)$ \\
 \hline
-BFS & Yes & No & $O(b^d)$ & $O(b^d)$ \\
+BFS & Yes & No & $O(b^d)$ or $O(V + E)$ & $O(b^d)$ or $O(V)$ \\
 \hline
-Dijkstra & Yes & Yes & $O(b^d)$ & $O(b^d)$ \\
+Dijkstra & Yes & Yes & $O(b^d)$ or $O((V + E)\log(V))$ & $O(b^d)$ or $O(V)$ \\
 \hline
 A* (admissible $h$) & Yes & Yes & $O(b^d)$ & $O(b^d)$ \\
 \hline
@@ -932,7 +932,7 @@ where $f$ is the focal length and $b$ is the baseline (distance between cameras)
     
     \item \textbf{Mathematical impact}: If the true depth is $Z$ but we use incorrect focal length $\hat{f} = f + \Delta f$, the estimated depth becomes:
     \[
-    \hat{Z} = \frac{\hat{f} \cdot B}{d} = \frac{(f + \Delta f) \cdot B}{d} = Z + \frac{\Delta f \cdot B}{d}
+    \hat{Z} = \frac{\hat{f} \cdot b}{d} = \frac{(f + \Delta f) \cdot b}{d} = Z + \frac{\Delta f \cdot b}{d}
     \]
     The depth error grows linearly with $\Delta f$ and inversely with disparity $d$ (larger for distant objects).
 \end{itemize}
