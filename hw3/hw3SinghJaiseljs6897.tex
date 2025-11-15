@@ -61,7 +61,12 @@ Camera calibration requires determining the extrinsic parameters—the rotation 
 
 \textbf{Results:} The algorithm successfully detected markers in both camera views with sufficient coverage for reliable pose estimation. Visualization of the detected board shows coordinate axes properly aligned with the Charuco pattern, confirming accurate calibration. The computed extrinsics were saved to \texttt{data/calibration/extrinsics\_result.json} for use in subsequent point cloud processing.
 
-\textbf{World Frame Orientation Question:} Examining the calibration visualizations and extrinsic transformation matrices, the z-axis is parallel to the vertical direction (orthogonal to the table surface). Looking at the translation vector components in the extrinsics, the camera center's position along the z-axis is \textbf{positive}, indicating the camera is positioned above the table/calibration board. This makes physical sense as cameras must be elevated to capture a top-down or angled view of the workspace. The red, green, and blue axes in the pose visualization confirm this coordinate system orientation.
+\textbf{World Frame Orientation Question:} Examining the calibration visualizations and extrinsic transformation matrices, the z-axis is parallel to the vertical direction (orthogonal to the table surface). Looking at the translation vector components in the extrinsics, the camera center's position along the z-axis is \textbf{positive}, indicating the camera is positioned above the table/calibration board. This makes physical sense as cameras must be elevated to capture a top-down or angled view of the workspace. The red, green, and blue axes in the pose visualization confirm this coordinate system orientation. 
+This is based on Looking at the tvec values (which represent world origin in camera frame), if `tvec[2]` (z-component) is positive, it means: 
+\begin{itemize}
+    \item The world origin is in front of the camera (positive z in camera frame)
+    \item This implies the camera is positioned at negative z in the world frame
+\end{itemize}
 
 \section{Point Cloud Visualization}
 
@@ -243,5 +248,6 @@ Analyzing the three query points together reveals key properties of DINOv2's lea
 \end{enumerate}
 
 The heatmaps demonstrate that DINOv2 learns meaningful, hierarchical semantic structures without supervision, making it a powerful foundation for robotic vision systems that must operate in diverse, unconstrained environments. The model's ability to balance geometric invariance, categorical grouping, and instance discrimination addresses fundamental challenges in robot perception for contact-rich manipulation tasks where both precise localization and semantic understanding are essential.
+I have generated a pdf that is attached below, it matches the implementation of the Jupyter notebook for all visuals that might be used for reference in the above report. During the pdf generalization, I commented out the sections which rendered video. 
 
 \end{document}
